@@ -24,6 +24,11 @@ def trim_csv(input_file:str, output_file:str):
             writer.writerow(cleaned_row)
 
 
+def html_to_table(html_file:str):
+    dfs = pd.read_html(html_file, header=0,encoding='utf-8')
+    for df in dfs:
+        print(df.sample(5))
+
 def extract_table(pdf_file:str, column_names:list = None, save_file:bool = False):
     if column_names == None:
         column_names = [
