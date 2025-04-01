@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from utils import COL_NAMES, SUBJ_NAMES
+from utils import COL_NAMES, SUBJ_NAMES, select_folder
 import os
 import pathlib
 
@@ -12,20 +12,34 @@ def load_data(input_file:str):
     data = pd.read_csv(input_file, delimiter=",", na_filter=False)
     return data
 
+
+
 # current working directory
 # print(f"Working from: {pathlib.Path().absolute()}")
 
-# List all files and directories in the current directory
-docs_path = os.path.join(pathlib.Path().absolute(), 'docs')
-# print(f"docs folder path: {docs_path}")
+# # List all files and directories in the current directory
+# docs_path = os.path.join(pathlib.Path().absolute(), 'docs')
+# # print(f"docs folder path: {docs_path}")
 
-with os.scandir('docs') as entries:
-    docs_files = [entry.name for entry in entries if entry.is_file()]
+# with os.scandir('docs') as entries:
+#     docs_files = [entry.name for entry in entries if entry.is_file()]
 
 # Main function
 def main():
     st.title("Esfera - Datos academicos")
     st.markdown("Este es un proyecto dedicado a gente que extrae información del tan tedioso Esfera. Va como va, ojala fuera mejor, pero la vida no es un lugar seguro. Así que: **tené paciencia nene**.")
+    selected_folder_path = st.session_state.get("folder_path", None)
+    folder_select_button = st.button("Selecciona carpeta")
+    if folder_select_button:
+        selected_folder_path = select_folder()
+        st.session_state.folder_path = selected_folder_path
+
+    if selected_folder_path:
+        st.write("Selected folder path:", selected_folder_path)
+
+    with os.scandir(selected_folder_path) as entries:
+        docs_files = [entry.name for entry in entries if entry.is_file()]
+
     selected_file = st.selectbox(
     "Selecciona el archivo CSV",
         docs_files,
@@ -33,7 +47,7 @@ def main():
     
 
     # Load the data
-    data = load_data(os.path.join(docs_path, selected_file))
+    data = load_data(os.path.join(selected_folder_path, selected_file))
     
     # Define the columns to visualize
     materias_options = COL_NAMES.values()

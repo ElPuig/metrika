@@ -4,6 +4,8 @@ from tabula import read_pdf
 import pandas as pd
 import os
 import pdfplumber
+import tkinter as tk
+from tkinter import filedialog
  
 MARKS = ["NA", "AS", "AN", "AE"]
 SUBJ_NAMES = ["CAT", "CAST", "ANG", "MAT", "BG", "FQ", "TD", "CS", "MUS", "EDF", "OPT", "PG_I", "PG_II", "COMP_DIG", "COMP_PERS", "COMP_CIUT", "COMP_EMPR"]
@@ -105,3 +107,11 @@ def trim_csv(input_file:str, output_file:str):
                 cleaned_row = [re.sub(pattern, mark, cell) for cell in row]
             print(f"Digested row:\t{cleaned_row}")
             writer.writerow(cleaned_row)
+
+
+def select_folder():
+   root = tk.Tk()
+   root.withdraw()
+   folder_path = filedialog.askdirectory(master=root)
+   root.destroy()
+   return folder_path
