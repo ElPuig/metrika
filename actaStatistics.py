@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from utils import COL_NAMES, SUBJ_NAMES, select_folder
+from utils import COL_NAMES, SUBJ_NAMES, MARK_COUNTS, select_folder
 import os
 import pathlib
 
@@ -12,17 +12,6 @@ def load_data(input_file:str):
     data = pd.read_csv(input_file, delimiter=",", na_filter=False)
     return data
 
-
-
-# current working directory
-# print(f"Working from: {pathlib.Path().absolute()}")
-
-# # List all files and directories in the current directory
-# docs_path = os.path.join(pathlib.Path().absolute(), 'docs')
-# # print(f"docs folder path: {docs_path}")
-
-# with os.scandir('docs') as entries:
-#     docs_files = [entry.name for entry in entries if entry.is_file()]
 
 # Main function
 def main():
@@ -47,7 +36,8 @@ def main():
     
 
     # Load the data
-    data = load_data(os.path.join(selected_folder_path, selected_file))
+    if selected_file:
+        data = load_data(os.path.join(selected_folder_path, selected_file))
     
     # Define the columns to visualize
     materias_options = COL_NAMES.values()
@@ -89,7 +79,53 @@ def main():
     # Add a dropdown to select a student by name
     student_names = data["NOM"].unique()  # Get unique student names
     selected_student = st.selectbox("Selecciona estudiante", student_names)
+
     
+    # Display pie chart of marks count
+    student_data_count = data[data["NOM"] == selected_student][MARK_COUNTS].iloc[0]
+    # 3. Prepare data for Plotly
+    plot_data = pd.DataFrame({
+        'Nota': [label.replace('_COUNT', '') for label in MARK_COUNTS],
+        'Frecuencia': student_data_count.values
+    })
+
+    # print(plot_data.head())
+
+    # 4. Create interactive pie chart
+    fig = px.pie(
+        plot_data,
+        values='Frecuencia',
+        names='Nota',
+        title=f'Distribución de notas para {selected_student}',
+        color='Nota',  # Use the index (unique values) for coloring
+        color_discrete_map=color_map,
+        hole=0.3,  # Creates a donut chart (set to 0 for regular pie)
+        hover_data=['Frecuencia'],
+        labels={'Frecuencia': 'Cantidad'}
+    )
+
+    # 5. Enhance the layout
+    fig.update_traces(
+        textposition='inside',
+        textinfo='percent+label',
+        pull=[0.1, 0, 0, 0],  # Pull slices for emphasis
+        marker=dict(line=dict(color='#000000', width=1))
+    )
+
+    fig.update_layout(
+        uniformtext_minsize=12,
+        uniformtext_mode='hide',
+        showlegend=True,
+        height=600
+    )
+
+    # 6. Display in Streamlit
+    st.plotly_chart(fig, use_container_width=True)
+
+    # 7. Show data table
+    st.subheader("Frecuencia de notas")
+    st.dataframe(plot_data.style.highlight_max(subset=plot_data.columns[-1:]))
+
     # 1. Filtrar por estudiante
     student_data = data[data["NOM"] == selected_student].copy()
 
@@ -144,8 +180,10 @@ def main():
         texttemplate='%{text}',
         hovertemplate='<b>%{x}</b><br>Valor: %{text}<extra></extra>'
     )
-    # Display the pie chart
+    # Display the bar chart
     st.plotly_chart(fig, use_container_width=True)
+
+
 
 # Run the app
 if __name__ == "__main__":

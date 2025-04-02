@@ -8,6 +8,7 @@ import tkinter as tk
 from tkinter import filedialog
  
 MARKS = ["NA", "AS", "AN", "AE"]
+MARK_COUNTS = ["NA_COUNT", "AS_COUNT", "AN_COUNT", "AE_COUNT"]
 SUBJ_NAMES = ["CAT", "CAST", "ANG", "MAT", "BG", "FQ", "TD", "CS", "MUS", "EDF", "OPT", "PG_I", "PG_II", "COMP_DIG", "COMP_PERS", "COMP_CIUT", "COMP_EMPR"]
 COL_NAMES={
 "Identificador de l'alumne/a": "id",
@@ -64,6 +65,11 @@ def digest_data(df:pd.DataFrame)->pd.DataFrame:
             df[col] = df[col].apply(
                 lambda x: pd.NA if str(x) not in MARKS else x
             )
+    # Add count columns
+    df['NA_COUNT'] = (df == 'NA').sum(axis=1)
+    df['AS_COUNT'] = (df == 'AS').sum(axis=1)
+    df['AN_COUNT'] = (df == 'AN').sum(axis=1)
+    df['AE_COUNT'] = (df == 'AE').sum(axis=1)
     return df
 
 
@@ -116,3 +122,7 @@ def select_folder():
    folder_path = filedialog.askdirectory(master=root)
    root.destroy()
    return folder_path
+
+def highlight_max_row(s):
+    is_max = s == s.max()
+    return ['background-color: lightgreen' if v else '' for v in is_max]
