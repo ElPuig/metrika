@@ -112,6 +112,7 @@ def trim_csv(input_file:str, output_file:str):
 def select_folder():
    root = tk.Tk()
    root.withdraw()
+   root.call('wm', 'attributes', '.', '-topmost', True)
    folder_path = filedialog.askdirectory(master=root)
    root.destroy()
    return folder_path
