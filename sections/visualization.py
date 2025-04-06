@@ -34,8 +34,7 @@ def subject_visualization(data:pd.DataFrame):
     st.plotly_chart(figGlobal)
 
 
-def student_mark_freq_visualization(data:pd.DataFrame, std_name:str):
-    st.subheader("Estadísticas por alumno")
+def student_mark_freq_visualization(data:pd.DataFrame, std_name:str, title:str):
     # Display pie chart of marks count
     count_cols = [f"{x}_COUNT" for x in MarkConfig.LIST.value]
     student_data_count = data[data["NOM"] == std_name][count_cols].iloc[0]
@@ -51,7 +50,7 @@ def student_mark_freq_visualization(data:pd.DataFrame, std_name:str):
         plot_data,
         values='Frecuencia',
         names='Nota',
-        title=f'Distribución de notas para {std_name}',
+        title=title,
         color='Nota',  # Use the index (unique values) for coloring
         color_discrete_map=MarkConfig.COLOR_MAP.value,
         hover_data=['Frecuencia'],
@@ -62,8 +61,7 @@ def student_mark_freq_visualization(data:pd.DataFrame, std_name:str):
     st.plotly_chart(fig, use_container_width=True)
 
 
-def student_marks_per_subject(data:pd.DataFrame, std_name:str):
-    st.subheader("Diagrama de barras: notas por materia")
+def student_marks_per_subject(data:pd.DataFrame, std_name:str, title:str):
     student_data = data[data["NOM"] == std_name]
     student_data = student_data[list(DataConfig.SUBJ_NAMES.value)]
     
@@ -89,7 +87,7 @@ def student_marks_per_subject(data:pd.DataFrame, std_name:str):
 
     # Personalizar diseño
     fig.update_layout(
-        title='Representación de valores por columna',
+        title=title,
         yaxis=dict(showticklabels=False, range=[0, 1.1]),
         height=300,
         showlegend=False,

@@ -9,7 +9,8 @@ from constants import TestConfig, AppConfig
 
 def main():
 
-    data = load_data(TestConfig.TEST_CSV_FILE_PATH.value)
+    data1 = load_data(TestConfig.TEST_CSV_FILE1_PATH.value)
+    data2 = load_data(TestConfig.TEST_CSV_FILE2_PATH.value)
 
     # Set page config
     st.set_page_config(
@@ -22,16 +23,23 @@ def main():
     show_header()
 
     # Show classroom visualization
-    show_classroom_stats(data)
+    show_classroom_stats(data1)
         
     # Show subject stats visualization
-    subject_visualization(data)
+    subject_visualization(data1)
 
     # Show student stats visualization
-    selected_student = select_student(data)
+    selected_student = select_student(data1)
     if selected_student:
-        student_marks_per_subject(data, selected_student)
-        student_mark_freq_visualization(data, selected_student)
+        st.subheader(f"Diagrama de barras: notas por materia de {selected_student}")
+        student_marks_per_subject(data1, selected_student, "1r trimestre")
+        student_marks_per_subject(data2, selected_student, "2o trimestre")
+        st.subheader(f"Distribución de notas para {selected_student}")
+        col1, col2 = st.columns(2)
+        with col1:
+            student_mark_freq_visualization(data1, selected_student, "1r trimestre")
+        with col2:
+            student_mark_freq_visualization(data2, selected_student, "2o trimestre")
 
 if __name__ == "__main__":
     main()
