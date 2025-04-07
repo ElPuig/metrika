@@ -1,7 +1,7 @@
 import streamlit as st
 from sections.header import show_header
-from sections.data_input import show_data_input, select_student
-from sections.visualization import show_classroom_stats, subject_visualization, student_mark_freq_visualization, student_marks_per_subject
+from sections.data_input import select_student
+from sections.visualization import show_classroom_table, subject_visualization, student_mark_freq_visualization, student_marks_per_subject
 from utils.data_loader import load_data
 from constants import TestConfig, AppConfig
 
@@ -23,7 +23,8 @@ def main():
     show_header()
 
     # Show classroom visualization
-    show_classroom_stats(data1)
+    show_classroom_table(data1, title="T1")
+    show_classroom_table(data2, title="T2")
         
     # Show subject stats visualization
     subject_visualization(data1)

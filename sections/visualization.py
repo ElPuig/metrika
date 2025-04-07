@@ -6,8 +6,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 
-def show_classroom_stats(data:pd.DataFrame):
-    with st.expander("Visualización global de la clase (tabla)"):
+def show_classroom_table(data:pd.DataFrame, title:str=None):
+    with st.expander(f"Tabla global clase ({title})"):
         st.dataframe(data, use_container_width=True)
 
 
