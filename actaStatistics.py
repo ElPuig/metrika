@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from utils import COL_NAMES, SUBJ_NAMES, MARK_COUNTS, select_folder
+from helpers import COL_NAMES, SUBJ_NAMES, MARK_COUNTS, select_folder
 import os
 import pathlib
 
@@ -56,7 +56,8 @@ def main():
     
     # Add a dropdown to select the column
     selected_materia = st.selectbox(key="sb1", label="Selecciona materia", options=materias_options)
-    
+
+
     # Display the selected column
     st.write(f"### Materia seleccionada: {selected_materia}")
     
