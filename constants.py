@@ -27,6 +27,33 @@ class MarkConfig(Enum):
     }
     """Define custom colors for each unique mark value"""
 
+    
+    @classmethod
+    def get_height_from_key(cls, key):
+        """Get the height from a key in HEIGHT_MAP dictionary.
+        
+        Args:
+            key (str): The key to search for in HEIGHT_MAP
+            
+        Returns:
+            int: The corresponding height if found, 0 otherwise
+        """
+        return cls.HEIGHT_MAP.get(key, 0)
+    
+    @classmethod
+    def get_mark_from_height(cls, height):
+        """Get the mark from a height in HEIGHT_MAP dictionary.
+        
+        Args:
+            height (int): The height to search for in HEIGHT_MAP
+            
+        Returns:
+            str: The corresponding mark if found, "" otherwise
+        """
+        # Invert the dictionary to get mark from height
+        height_to_mark = {v: k for k, v in cls.HEIGHT_MAP.value.items()}
+        return height_to_mark.get(height, "")
+
 
 class DataConfig(Enum):
     """This class contains constant values ralted to PDF data extracted from Esfera."""
@@ -56,6 +83,21 @@ class DataConfig(Enum):
         "Comp. Empr.": "COMP_EMPR"
     }
     """Dictionary to relate actual column name with short name."""
+
+    @classmethod
+    def get_key_from_value(cls, value):
+        """Get the key from a value in COL_NAMES dictionary.
+        
+        Args:
+            value (str): The value to search for in COL_NAMES
+            
+        Returns:
+            str: The corresponding key if found, None otherwise
+        """
+        for key, val in cls.COL_NAMES.value.items():
+            if val == value:
+                return key
+        return None
 
 
 class AppConfig(Enum):
