@@ -137,3 +137,6 @@ frontend/cypress/snapshots/linux/1x
 
 # environment
 /strlitenv
+
+# sensitive data
+/docs
