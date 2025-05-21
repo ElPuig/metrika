@@ -108,6 +108,6 @@ class AppConfig(Enum):
 
 
 class TestConfig(Enum):
-    TEST_CSV_FILE1_PATH="docs/ActaAvaluacioGraella_ESO LOE (Modificada)_3_ESO 3B_T1.csv"
-    TEST_CSV_FILE2_PATH="docs/ActaAvaluacioGraella_ESO LOE (Modificada)_3_ESO 3B_T2.csv"
+    TEST_CSV_FILE1_PATH="docs/dummy1.csv" # T1
+    TEST_CSV_FILE2_PATH="docs/dummy2.csv" # T2
 
