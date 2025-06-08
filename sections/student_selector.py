@@ -18,10 +18,10 @@ def display_student_selector(students):
     
     # Calculate average grade
     mark_to_value = {
-        "No assoliment": 0,
-        "Assoliment satisfactori": 1,
-        "Assoliment notable": 2,
-        "Assoliment excel·lent": 3
+        "No assoliment": 2.5,
+        "Assoliment satisfactori": 5,
+        "Assoliment notable": 7.5,
+        "Assoliment excel·lent": 10
     }
     
     # Get all evaluated subjects (excluding non-evaluated ones)
@@ -34,10 +34,7 @@ def display_student_selector(students):
         # Calculate average
         total_value = sum(mark_to_value[subject['qualificacio']] for subject in evaluated_subjects)
         average = total_value / len(evaluated_subjects)
-        
-        # Convert to 0-10 scale (multiply by 10/3 since original scale is 0-3)
-        average_10 = average * (10/3)
-        
+                
         # Display average grade in a dashboard style
         st.subheader("Nota Mitjana")
         
@@ -47,7 +44,7 @@ def display_student_selector(students):
         with col1:
             st.metric(
                 label="Nota Mitjana (0-10)",
-                value=f"{average_10:.2f}",
+                value=f"{average:.2f}",
                 delta=None
             )
         

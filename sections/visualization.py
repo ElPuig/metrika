@@ -275,7 +275,7 @@ def display_group_statistics(students):
         margin=dict(t=50, b=50, l=50, r=50)  # Add margins on all sides
     )
 
-    st.subheader("Distribució Global de Qualificacions")
+    st.subheader("Distribució de qualificacions per trimestre")
     # Display the chart in Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
@@ -388,12 +388,12 @@ def display_subjects_bar_chart(students):
 
 
 def display_student_ranking(students):
-    st.subheader("Ranking d'alumnes per mitjana numèrica (NA=0, AS=1, AN=2, AE=3)")
+    st.subheader("Ranking d'alumnes per mitjana numèrica (NA=2.5, AS=5, AN=7.5, AE=10)")
     mark_to_value = {
-        "No assoliment": 0,
-        "Assoliment satisfactori": 1,
-        "Assoliment notable": 2,
-        "Assoliment excel·lent": 3
+        "No assoliment": 2.5,
+        "Assoliment satisfactori": 5,
+        "Assoliment notable": 7.5,
+        "Assoliment excel·lent": 10
     }
     ranking = []
     for student in students:
@@ -404,8 +404,7 @@ def display_student_ranking(students):
         ]
         if values:
             avg = sum(values) / len(values)
-            avg_10 = avg * 10 / 3
-            avg_10 = float(f"{avg_10:.2g}")
+            avg_10 = float(f"{avg:.2g}")
         else:
             avg_10 = "N/A"
         ranking.append({
