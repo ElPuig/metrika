@@ -3,7 +3,7 @@ from sections.header import show_header
 from sections.data_input import select_student
 from sections.visualization import show_classroom_table, subject_visualization, student_mark_freq_visualization, student_marks_per_subject, show_student_evolution
 from utils.data_loader import load_data
-from constants import TestConfig, AppConfig, DataConfig
+from utils.constants import TestConfig, AppConfig, DataConfig
 import json
 import os
 import pandas as pd

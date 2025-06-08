@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from helpers import COL_NAMES, SUBJ_NAMES, MARK_COUNTS, select_folder
+from utils.helpers import COL_NAMES, SUBJ_NAMES, MARK_COUNTS, select_folder
 import os
 import pathlib
 

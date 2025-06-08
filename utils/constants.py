@@ -6,10 +6,10 @@ class MathConstants(Enum):
     PI = 3.14159
 
 class MarkConfig(Enum):
-    NA = "NA"
-    AS = "AS"
-    AN = "AN"
-    AE = "AE"
+    NA = "No assoliment"
+    AS = "Assoliment satisfactori"
+    AN = "Assoliment notable"
+    AE = "Assoliment excel·lent"
     LIST = (NA, AS, AN, AE)
     """List of marks (tuple)"""
     
@@ -18,10 +18,10 @@ class MarkConfig(Enum):
     
     
     COLOR_MAP = {
-        "NA": "#d62728",  # Red
-        "AS": "#ff7f0e",  # Orange
-        "AN": "#1f77b4",  # Blue
-        "AE": "#2ca02c",  # Green
+        "No assoliment": "#d62728",  # Red
+        "Assoliment satisfactori": "#ff7f0e",  # Orange
+        "Assoliment notable": "#1f77b4",  # Blue
+        "Assoliment excel·lent": "#2ca02c",  # Green
         "": "gray",
         pd.NA: "gray"
     }
