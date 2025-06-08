@@ -110,4 +110,6 @@ class AppConfig(Enum):
 class TestConfig(Enum):
     TEST_CSV_FILE1_PATH="docs/dummy1.csv" # T1
     TEST_CSV_FILE2_PATH="docs/dummy2.csv" # T2
+    TEST_JSON_FILE1_PATH="docs/dummy1.json" # T1
+    TEST_JSON_FILE2_PATH="docs/dummy2.json" # T2
 
