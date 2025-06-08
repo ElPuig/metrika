@@ -234,6 +234,9 @@ def display_marks_pie_chart(student_data):
     )
 
     st.subheader("Distribució de Qualificacions")
+    # display table with qualification counts
+    st.dataframe(pd.DataFrame(filtered_counts, index=[0]), use_container_width=True, hide_index=True)
+
     # Display the chart in Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
