@@ -9,20 +9,33 @@ Una aplicació web basada en Streamlit per analitzar i visualitzar dades del ren
 - Anàlisi i estadístiques per matèria
 - Seguiment individual del rendiment dels estudiants
 - Visualització detallada de la distribució de notes
-
-### No implementades
 - Anàlisi comparatiu entre trimestres
 - Seguiment de l'evolució dels estudiants
 - Comentaris i retroalimentació detallada per matèria
+- Filtre per curs (1r, 2n, 3r) en totes les visualitzacions
+- Generació de dades aleatòries per a proves i simulacions
+
+### No implementades
+- Exportació de dades a altres formats
+- Integració amb sistemes externs
+- Gestió d'usuaris i permisos
 
 ## Estructura del Projecte
 
 ```
 ├── json_viewer.py         # Utilitats de visualització de dades JSON
 ├── requirements.txt       # Dependències del projecte
-├── components/           # Components d'interfície reutilitzables
 ├── sections/            # Seccions principals de l'aplicació
+│   ├── evolution.py     # Visualitzacions d'evolució de notes
+│   ├── student_marks.py # Visualització de notes per alumne
+│   ├── student_selector.py # Selector d'alumnes
+│   └── visualization.py # Visualitzacions generals i estadístiques
 ├── utils/               # Funcions i ajudants d'utilitat
+│   ├── constants.py     # Constants i configuracions
+│   ├── csv_to_json.py   # Conversió de CSV a JSON
+│   ├── data_loader.py   # Càrrega de dades
+│   ├── generate_dummy_data.py # Generació de dades de prova
+│   └── helpers.py       # Funcions auxiliars
 └── docs/               # Documentació i fitxers de dades (no traçat en el repositori)
 ```
 
@@ -49,7 +62,7 @@ pip install -r requirements.txt
 
 1. Inicia l'aplicació Streamlit:
 ```bash
-streamlit run app.py
+streamlit run json_viewer.py
 ```
 
 2. Accedeix a l'aplicació a través del teu navegador web a `http://localhost:8501`
@@ -62,20 +75,27 @@ streamlit run app.py
 - Visualització de freqüència de notes
 - Seguiment individual del rendiment
 - Anàlisi comparatiu entre trimestres
+- Filtre per curs en totes les visualitzacions
 
 ### Anàlisi d'Estudiants
 - Seguiment individual del rendiment
 - Visualització de l'evolució de notes
 - Desglossament de notes per matèria
 - Comentaris i retroalimentació detallada
+- Evolució temporal per trimestre
+
+### Generació de Dades
+- Creació de dades aleatòries per a proves
+- Generació de dades per diferents trimestres
+- Manteniment de la coherència en les dades generades
 
 ## Dependències
 
 El projecte utilitza diversos paquets Python clau:
 - Streamlit per a la interfície web
 - Pandas per a la manipulació de dades
-- Altair i Plotly per a visualitzacions
-- Biblioteques de processament de PDF (pdf2image, pdfplumber)
+- Plotly per a visualitzacions interactives
+- Biblioteques de processament de PDF (pdfplumber)
 - Diverses eines d'anàlisi i visualització de dades
 
 ## Contribució
