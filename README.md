@@ -1,96 +1,95 @@
-# ESF Extraction and Analysis Tool
+# Eina d'Extracció i Anàlisi d'Informes Acadèmics
 
-A Streamlit-based web application for analyzing and visualizing student academic performance data from ESF (Escola Sant Feliu) reports.
+Una aplicació web basada en Streamlit per analitzar i visualitzar dades del rendiment acadèmic dels estudiants a partir d'informes escolars.
 
-## Features
+## Característiques
 
-- Interactive data visualization of student performance
-- Subject-wise analysis and statistics
-- Individual student performance tracking
-- Comparative analysis between academic terms
-- Detailed grade distribution visualization
-- Student evolution tracking
-- Comprehensive subject-wise comments and feedback
+### Implementades
+- Visualització interactiva del rendiment dels estudiants
+- Anàlisi i estadístiques per matèria
+- Seguiment individual del rendiment dels estudiants
+- Visualització detallada de la distribució de notes
 
-## Project Structure
+### No implementades
+- Anàlisi comparatiu entre trimestres
+- Seguiment de l'evolució dels estudiants
+- Comentaris i retroalimentació detallada per matèria
+
+## Estructura del Projecte
 
 ```
-├── app.py                 # Main Streamlit application
-├── acta_processor.py      # Processing logic for academic records
-├── acta_statistics.py     # Statistical analysis functions
-├── json_viewer.py         # JSON data visualization utilities
-├── requirements.txt       # Project dependencies
-├── components/           # Reusable UI components
-├── sections/            # Main application sections
-├── utils/               # Utility functions and helpers
-├── docs/               # Documentation and data files
-└── calc_scripts/       # Calculation and processing scripts
+├── json_viewer.py         # Utilitats de visualització de dades JSON
+├── requirements.txt       # Dependències del projecte
+├── components/           # Components d'interfície reutilitzables
+├── sections/            # Seccions principals de l'aplicació
+├── utils/               # Funcions i ajudants d'utilitat
+└── docs/               # Documentació i fitxers de dades (no traçat en el repositori)
 ```
 
-## Installation
+## Instal·lació
 
-1. Clone the repository:
+1. Clona el repositori:
 ```bash
-git clone [repository-url]
+git clone [url-del-repositori]
 cd esfextraction
 ```
 
-2. Create and activate a virtual environment:
+2. Crea i activa un entorn virtual:
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # A Windows: venv\Scripts\activate
 ```
 
-3. Install dependencies:
+3. Instal·la les dependències:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+## Ús
 
-1. Start the Streamlit application:
+1. Inicia l'aplicació Streamlit:
 ```bash
 streamlit run app.py
 ```
 
-2. Access the application through your web browser at `http://localhost:8501`
+2. Accedeix a l'aplicació a través del teu navegador web a `http://localhost:8501`
 
-## Main Features
+## Característiques Principals
 
-### Data Visualization
-- Classroom performance tables
-- Subject-wise statistics
-- Student mark frequency visualization
-- Individual student performance tracking
-- Comparative analysis between terms
+### Visualització de Dades
+- Taules de rendiment de l'aula
+- Estadístiques per matèria
+- Visualització de freqüència de notes
+- Seguiment individual del rendiment
+- Anàlisi comparatiu entre trimestres
 
-### Student Analysis
-- Individual student performance tracking
-- Grade evolution visualization
-- Subject-wise grade breakdown
-- Detailed feedback and comments
+### Anàlisi d'Estudiants
+- Seguiment individual del rendiment
+- Visualització de l'evolució de notes
+- Desglossament de notes per matèria
+- Comentaris i retroalimentació detallada
 
-## Dependencies
+## Dependències
 
-The project uses several key Python packages:
-- Streamlit for the web interface
-- Pandas for data manipulation
-- Altair and Plotly for visualizations
-- PDF processing libraries (pdf2image, pdfplumber)
-- Various data analysis and visualization tools
+El projecte utilitza diversos paquets Python clau:
+- Streamlit per a la interfície web
+- Pandas per a la manipulació de dades
+- Altair i Plotly per a visualitzacions
+- Biblioteques de processament de PDF (pdf2image, pdfplumber)
+- Diverses eines d'anàlisi i visualització de dades
 
-## Contributing
+## Contribució
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+1. Fes un fork del repositori
+2. Crea una branca per a la teva funcionalitat
+3. Fes commit dels teus canvis
+4. Fes push a la branca
+5. Crea una Pull Request
 
-## License
+## Llicència
 
-[Specify your license here]
+[Especifica la teva llicència aquí]
 
-## Contact
+## Contacte
 
-[Your contact information] 
+[La teva informació de contacte] 
