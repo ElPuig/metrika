@@ -3,7 +3,7 @@ import json
 import os
 from typing import Dict, List, Set
 
-def process_csv_to_json(csv_file: str, json_file: str) -> None:
+def process_csv_to_json(csv_file: str, json_file: str, trimestre: str = None) -> None:
     # List to store all students data
     students_data = []
     
@@ -11,10 +11,7 @@ def process_csv_to_json(csv_file: str, json_file: str) -> None:
         with open(csv_file, 'r', encoding='utf-8') as file:
             # Read CSV file with custom delimiter and quote character
             csv_reader = csv.DictReader(file, delimiter='|', quotechar='"')
-            
-            # Print column names for debugging
-            print("Available columns:", csv_reader.fieldnames)
-            
+                        
             for row in csv_reader:
                 try:
                     # Create student dictionary with more flexible field names
@@ -22,7 +19,8 @@ def process_csv_to_json(csv_file: str, json_file: str) -> None:
                         "id": row.get("id", row.get("ID", "")),
                         "nom_cognoms": row.get("nom_cognoms", row.get("NOM_COGNOMS", "")),
                         "materies": [],
-                        "comentari_general": row.get("comentari general", row.get("COMENTARI GENERAL", ""))
+                        "comentari_general": row.get("comentari general", row.get("COMENTARI GENERAL", "")),
+                        "trimestre": trimestre  # Añadir información del trimestre
                     }
                     
                     # Process subjects (up to 100)
@@ -80,23 +78,35 @@ def get_unique_subjects(csv_file: str) -> Set[str]:
         
     return unique_subjects
 
-if __name__ == "__main__":
+def process_trimestre_files():
+    """Procesa los archivos CSV de cada trimestre y los convierte a JSON"""
     # Get the parent directory path
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    docs_dir = os.path.join(parent_dir, "docs")
     
-    # Define input and output paths
-    input_csv = os.path.join(parent_dir, "docs", "dummy1.csv")
-    output_json = os.path.join(parent_dir, "docs", "dummy1.json")
+    # Procesar cada trimestre
+    trimestres = {
+        "T1": "dummy1.csv",
+        "T2": "dummy2.csv",
+        "T3": "dummy3.csv"
+    }
     
-    try:
-        # Get and print unique subjects
-        unique_subjects = get_unique_subjects(input_csv)
-        print("\nMaterias únicas encontradas:")
-        for subject in sorted(unique_subjects):
-            print(f"- {subject}")
-            
-        # Process CSV to JSON
-        process_csv_to_json(input_csv, output_json)
-        print(f"\nConversión completada con éxito. Output guardado en {output_json}")
-    except Exception as e:
-        print(f"An error occurred: {str(e)}") 
+    for trimestre, csv_file in trimestres.items():
+        input_csv = os.path.join(docs_dir, csv_file)
+        output_json = os.path.join(docs_dir, f"{trimestre}.json")
+        
+        try:
+            # Get and print unique subjects
+            unique_subjects = get_unique_subjects(input_csv)
+            # print(f"\nMaterias únicas encontradas en {trimestre}:")
+            # for subject in sorted(unique_subjects):
+            #     print(f"- {subject}")
+                
+            # Process CSV to JSON
+            process_csv_to_json(input_csv, output_json, trimestre)
+            print(f"\nConversión completada con éxito para {trimestre}. Output guardado en {output_json}")
+        except Exception as e:
+            print(f"Error procesando {trimestre}: {str(e)}")
+
+if __name__ == "__main__":
+    process_trimestre_files() 
