@@ -74,7 +74,9 @@ def main():
             display_marks_pie_chart(selected_student_data)
             
     with tab3:
-        display_evolution_dashboard(students)
+        # Load all trimesters for evolution comparison
+        all_trimesters = load_json_files()
+        display_evolution_dashboard(all_trimesters)
 
 if __name__ == "__main__":
     main() 

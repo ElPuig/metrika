@@ -87,59 +87,193 @@ def display_subject_evolution(students, selected_subject):
     st.plotly_chart(fig, use_container_width=True)
 
 def display_evolution_dashboard(students):
-    """Muestra el dashboard completo de evolución"""
-    st.subheader("Evolució de les notes")
+    """Muestra el dashboard de evolución comparando trimestres para asignaturas de 3r"""
+    st.subheader("Evolució de les notes entre trimestres (3r)")
     
-    # Add course level checkboxes
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        first_year = st.checkbox("1r", value=False, key="evo_1r")
-    with col2:
-        second_year = st.checkbox("2n", value=False, key="evo_2n")
-    with col3:
-        third_year = st.checkbox("3r", value=True, key="evo_3r")
-
-    selected_courses = []
-    if first_year:
-        selected_courses.append("1r")
-    if second_year:
-        selected_courses.append("2n")
-    if third_year:
-        selected_courses.append("3r")
-
-    # Filter students based on selected courses
-    filtered_students = []
+    # Agrupar estudiantes por trimestre
+    trimesters = {}
     for student in students:
-        filtered_materies = []
+        trimester = student['trimestre']
+        if trimester not in trimesters:
+            trimesters[trimester] = []
+        trimesters[trimester].append(student)
+    
+    # Verificar que tenemos datos de al menos dos trimestres
+    if len(trimesters) < 2:
+        st.warning("Es necessiten dades d'almenys dos trimestres per veure l'evolució")
+        return
+    
+    # Obtener lista de asignaturas de 3r
+    third_year_subjects = set()
+    for student in students:
         for materia in student['materies']:
-            if any(c in materia['materia'] for c in selected_courses):
-                filtered_materies.append(materia)
-        if filtered_materies:
-            student_copy = student.copy()
-            student_copy['materies'] = filtered_materies
-            filtered_students.append(student_copy)
+            if "3r" in materia['materia']:
+                third_year_subjects.add(materia['materia'])
+    
+    if not third_year_subjects:
+        st.warning("No s'han trobat assignatures de 3r")
+        return
     
     # Selector de tipo de visualización
     viz_type = st.radio(
-        "Selecciona el tipo de visualización",
-        ["Evolució general", "Evolució per alumne", "Evolució per assignatura"]
+        "Selecciona el tipus de visualització",
+        ["Evolució per assignatura", "Evolució per alumne"]
     )
     
-    if viz_type == "Evolució general":
-        display_evolution_chart(filtered_students)
-    
-    elif viz_type == "Evolució per alumne":
-        # Selector de estudiante
-        student_names = list(set(s['nom_cognoms'] for s in filtered_students))
-        selected_student = st.selectbox("Selecciona un alumne", student_names)
-        display_student_evolution(filtered_students, selected_student)
-    
-    else:  # Evolució per assignatura
-        # Obtener lista de asignaturas únicas
-        subjects = set()
-        for student in filtered_students:
-            for materia in student['materies']:
-                subjects.add(materia['materia'])
+    if viz_type == "Evolució per assignatura":
+        # Selector de asignatura
+        selected_subject = st.selectbox(
+            "Selecciona una assignatura",
+            sorted(list(third_year_subjects))
+        )
         
-        selected_subject = st.selectbox("Selecciona una assignatura", sorted(list(subjects)))
-        display_subject_evolution(filtered_students, selected_subject) 
+        # Preparar datos para el gráfico
+        evolution_data = []
+        for trimester, trimester_students in trimesters.items():
+            for student in trimester_students:
+                for materia in student['materies']:
+                    if materia['materia'] == selected_subject:
+                        evolution_data.append({
+                            'Trimestre': trimester,
+                            'Alumne': student['nom_cognoms'],
+                            'Qualificació': materia['qualificacio']
+                        })
+        
+        df = pd.DataFrame(evolution_data)
+        
+        # Convertir calificaciones a valores numéricos para el gráfico
+        mark_to_value = {
+            MarkConfig.NA.value: 1,
+            MarkConfig.AS.value: 2,
+            MarkConfig.AN.value: 3,
+            MarkConfig.AE.value: 4
+        }
+        df['Valor'] = df['Qualificació'].map(mark_to_value)
+        
+        # Crear gráfico de evolución
+        fig = go.Figure()
+        
+        # Añadir líneas para cada estudiante
+        for student in df['Alumne'].unique():
+            student_data = df[df['Alumne'] == student]
+            fig.add_trace(go.Scatter(
+                x=student_data['Trimestre'],
+                y=student_data['Valor'],
+                mode='lines+markers',
+                name=student,
+                text=[f"{row['Alumne']}<br>Nota: {row['Qualificació']}" for _, row in student_data.iterrows()],
+                hoverinfo='text'
+            ))
+        
+        # Personalizar diseño
+        fig.update_layout(
+            title=f"Evolució de {selected_subject} per trimestre",
+            xaxis_title="Trimestre",
+            yaxis_title="Qualificació",
+            yaxis=dict(
+                range=[0.5, 4.5],
+                ticktext=["NA", "AS", "AN", "AE"],
+                tickvals=[1, 2, 3, 4]
+            ),
+            height=600,
+            showlegend=True,
+            legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="left",
+                x=0.01
+            )
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Mostrar tabla de evolución
+        st.subheader("Taula d'evolució")
+        pivot_df = df.pivot(index='Alumne', columns='Trimestre', values='Qualificació')
+        st.dataframe(pivot_df, use_container_width=True)
+        
+    else:  # Evolució per alumne
+        # Selector de estudiante
+        student_names = list(set(s['nom_cognoms'] for s in students))
+        selected_student = st.selectbox("Selecciona un alumne", sorted(student_names))
+        
+        # Preparar datos para el gráfico
+        evolution_data = []
+        for trimester, trimester_students in trimesters.items():
+            student_data = next((s for s in trimester_students if s['nom_cognoms'] == selected_student), None)
+            if student_data:
+                for materia in student_data['materies']:
+                    if "3r" in materia['materia']:
+                        evolution_data.append({
+                            'Trimestre': trimester,
+                            'Assignatura': materia['materia'],
+                            'Qualificació': materia['qualificacio']
+                        })
+        
+        df = pd.DataFrame(evolution_data)
+        
+        # Convertir calificaciones a valores numéricos para el gráfico
+        mark_to_value = {
+            MarkConfig.NA.value: 1,
+            MarkConfig.AS.value: 2,
+            MarkConfig.AN.value: 3,
+            MarkConfig.AE.value: 4
+        }
+        df['Valor'] = df['Qualificació'].map(mark_to_value)
+        
+        # Crear gráfico de evolución
+        fig = go.Figure()
+        
+        # Añadir líneas para cada asignatura
+        for subject in df['Assignatura'].unique():
+            subject_data = df[df['Assignatura'] == subject]
+            fig.add_trace(go.Scatter(
+                x=subject_data['Trimestre'],
+                y=subject_data['Valor'],
+                mode='lines+markers',
+                name=subject,
+                text=[f"{row['Assignatura']}<br>Nota: {row['Qualificació']}" for _, row in subject_data.iterrows()],
+                hoverinfo='text'
+            ))
+        
+        # Personalizar diseño
+        fig.update_layout(
+            title=f"Evolució de les notes de {selected_student} per trimestre",
+            xaxis_title="Trimestre",
+            yaxis_title="Qualificació",
+            yaxis=dict(
+                range=[0.5, 4.5],
+                ticktext=["NA", "AS", "AN", "AE"],
+                tickvals=[1, 2, 3, 4]
+            ),
+            height=600,
+            showlegend=True,
+            legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="left",
+                x=0.01
+            )
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Mostrar tabla de evolución
+        st.subheader("Taula d'evolució")
+        pivot_df = df.pivot(index='Assignatura', columns='Trimestre', values='Qualificació')
+        st.dataframe(pivot_df, use_container_width=True)
+        
+        # Mostrar resumen de evolución
+        st.subheader("Resum d'evolució")
+        
+        # Calcular promedio por trimestre
+        trimester_avgs = df.groupby('Trimestre')['Valor'].mean()
+        
+        # Mostrar métricas
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Promig T1", MarkConfig.get_mark_from_height(trimester_avgs.get('T1', 0)))
+        with col2:
+            st.metric("Promig T2", MarkConfig.get_mark_from_height(trimester_avgs.get('T2', 0)))
+        with col3:
+            st.metric("Promig T3", MarkConfig.get_mark_from_height(trimester_avgs.get('T3', 0))) 
