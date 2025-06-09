@@ -487,6 +487,8 @@ def display_student_subject_heatmap(students):
     # Create DataFrame
     df = pd.DataFrame(matrix_data)
     df = df.set_index('Alumne')
+    # Sort by alumne alphabetically
+    df = df.sort_index(key=lambda x: x.str.lower())
 
     # Create heatmap
     fig = go.Figure(data=go.Heatmap(
@@ -506,7 +508,7 @@ def display_student_subject_heatmap(students):
         ),
         hoverongaps=False,
         hoverinfo='text',
-        text=[[f"{MarkConfig.get_mark_from_height(val)}" if val is not None else "N/A" for val in row] for row in df.values]
+        text=[[{0: MarkConfig.NA.value, 1: MarkConfig.AS.value, 2: MarkConfig.AN.value, 3: MarkConfig.AE.value}.get(val, "N/A") for val in row] for row in df.values]
     ))
 
     # Update layout
@@ -515,8 +517,114 @@ def display_student_subject_heatmap(students):
         xaxis_title="Assignatures",
         yaxis_title="Alumnes",
         xaxis={'tickangle': 45},
+        yaxis={'autorange': 'reversed'},  # This will show students in correct alphabetical order
         margin=dict(t=50, b=100, l=100, r=50)  # Add margins for labels
     )
 
     # Display the heatmap
     st.plotly_chart(fig, use_container_width=True)
+
+
+def display_subject_statistics(students):
+    """Display statistics and comments for a specific subject"""
+    # Add course level checkboxes
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        first_year = st.checkbox("1r", value=False, key="subject_1r")
+    with col2:
+        second_year = st.checkbox("2n", value=False, key="subject_2n")
+    with col3:
+        third_year = st.checkbox("3r", value=True, key="subject_3r")
+
+    selected_courses = []
+    if first_year:
+        selected_courses.append("1r")
+    if second_year:
+        selected_courses.append("2n")
+    if third_year:
+        selected_courses.append("3r")
+    
+    # Get unique subjects filtered by selected courses
+    all_subjects = set()
+    for student in students:
+        for materia in student['materies']:
+            if any(c in materia['materia'] for c in selected_courses):
+                all_subjects.add(materia['materia'])
+    
+    if not all_subjects:
+        st.info("Selecciona almenys un curs per veure les assignatures.")
+        return
+    
+    # Subject selector
+    selected_subject = st.selectbox(
+        "Selecciona una assignatura",
+        sorted(list(all_subjects)),
+        key="subject_selector"
+    )
+    
+    st.subheader(f"Estadístiques de {selected_subject}")
+    
+    # Count marks for the selected subject
+    mark_counts = {
+        MarkConfig.NA.value: 0,
+        MarkConfig.AS.value: 0,
+        MarkConfig.AN.value: 0,
+        MarkConfig.AE.value: 0
+    }
+    
+    # Collect comments
+    comments_data = []
+    
+    for student in students:
+        for materia in student['materies']:
+            if materia['materia'] == selected_subject:
+                mark = materia['qualificacio']
+                if mark in mark_counts:
+                    mark_counts[mark] += 1
+                comments_data.append({
+                    'Alumne': student['nom_cognoms'],
+                    'Qualificació': mark,
+                    'Comentari': materia['comentari']
+                })
+    
+    # Filter out marks with zero count
+    filtered_counts = {k: v for k, v in mark_counts.items() if v > 0}
+    
+    # Create pie chart
+    fig = go.Figure(data=[go.Pie(
+        labels=list(filtered_counts.keys()),
+        values=list(filtered_counts.values()),
+        hole=.3,
+        textinfo='label+percent+value',
+        insidetextorientation='radial',
+        marker_colors=[MarkConfig.COLOR_MAP.value[mark] for mark in filtered_counts.keys()]
+    )])
+    
+    fig.update_layout(
+        showlegend=False,
+        height=500,
+        margin=dict(t=50, b=50, l=50, r=50)
+    )
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Distribució de qualificacions")
+        st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        # Display comments table
+        if comments_data:
+            st.subheader("Comentaris per alumne")
+            df_comments = pd.DataFrame(comments_data)
+            df_comments = df_comments.sort_values('Alumne')
+            st.dataframe(
+                df_comments,
+                column_config={
+                    "Alumne": st.column_config.TextColumn("Alumne", width="medium"),
+                    "Qualificació": st.column_config.TextColumn("Qualificació", width="small"),
+                    "Comentari": st.column_config.TextColumn("Comentari", width="large")
+                },
+                hide_index=True,
+                use_container_width=True
+            )
+        else:
+            st.info("No s'han trobat comentaris per aquesta assignatura.")
+    

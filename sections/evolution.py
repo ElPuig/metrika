@@ -117,14 +117,16 @@ def display_evolution_dashboard(students):
     # Selector de tipo de visualización
     viz_type = st.radio(
         "Selecciona el tipus de visualització",
-        ["Evolució per assignatura", "Evolució per alumne"]
+        ["Evolució per assignatura", "Evolució per alumne"],
+        key="evolution_type"
     )
     
     if viz_type == "Evolució per assignatura":
         # Selector de asignatura
         selected_subject = st.selectbox(
             "Selecciona una assignatura",
-            sorted(list(third_year_subjects))
+            sorted(list(third_year_subjects)),
+            key="evolution_subject"
         )
         
         # Preparar datos para el gráfico
@@ -195,7 +197,11 @@ def display_evolution_dashboard(students):
     else:  # Evolució per alumne
         # Selector de estudiante
         student_names = list(set(s['nom_cognoms'] for s in students))
-        selected_student = st.selectbox("Selecciona un alumne", sorted(student_names))
+        selected_student = st.selectbox(
+            "Selecciona un alumne", 
+            sorted(student_names),
+            key="evolution_student"
+        )
         
         # Preparar datos para el gráfico
         evolution_data = []

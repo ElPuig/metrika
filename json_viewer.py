@@ -3,7 +3,15 @@ import json
 import os
 from sections.student_marks import display_student_marks
 from sections.student_selector import display_student_selector
-from sections.visualization import display_marks_pie_chart, display_group_statistics, group_failure_table, display_subjects_bar_chart, display_student_ranking, display_student_subject_heatmap
+from sections.visualization import (
+    display_marks_pie_chart, 
+    display_group_statistics, 
+    group_failure_table, 
+    display_subjects_bar_chart, 
+    display_student_ranking, 
+    display_student_subject_heatmap,
+    display_subject_statistics
+)
 from sections.evolution import display_evolution_dashboard
 from utils.constants import MarkConfig
 import plotly.graph_objects as go
@@ -38,7 +46,8 @@ def main():
     trimestre = st.selectbox(
         "Selecciona el trimestre",
         ["T1", "T2", "T3"],
-        index=2  # Por defecto mostrar todos
+        index=2,  # Por defecto mostrar todos
+        key="trimester_selector"
     )
     
     # Cargar estudiantes según el trimestre seleccionado
@@ -50,7 +59,7 @@ def main():
     # print(students[0])
     
     # Create tabs for different views
-    tab1, tab2, tab3 = st.tabs(["Grup", "Alumne", "Evolució"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Grup", "Materia", "Alumne", "Evolució"])
     
     with tab1:
         col1, col2 = st.columns(2)
@@ -62,7 +71,11 @@ def main():
         display_student_subject_heatmap(students)
         display_student_ranking(students)
     
-    with tab2:    
+    with tab2:
+        # Display subject statistics
+        display_subject_statistics(students)
+    
+    with tab3:    
         # Display student selector and get selected student data
         selected_student_data = display_student_selector(students)
         col1, col2 = st.columns(2)
@@ -73,7 +86,7 @@ def main():
             # Display pie chart of marks
             display_marks_pie_chart(selected_student_data)
             
-    with tab3:
+    with tab4:
         # Load all trimesters for evolution comparison
         all_trimesters = load_json_files()
         display_evolution_dashboard(all_trimesters)
