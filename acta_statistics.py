@@ -40,7 +40,10 @@ def main():
         data = load_data(os.path.join(selected_folder_path, selected_file))
     
     # Define the columns to visualize
-    materias_options = COL_NAMES.values()
+    # Get all columns from data except 'id' and 'NOM'
+    all_columns = [col for col in data.columns if col not in ['id', 'NOM']]
+    # Combine SUBJ_NAMES with any additional columns from data
+    materias_options = list(set(SUBJ_NAMES + all_columns))
     
     # Define custom colors for each unique value
     color_map = {
