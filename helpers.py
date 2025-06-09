@@ -9,7 +9,7 @@ from tkinter import filedialog
  
 MARKS = ["NA", "AS", "AN", "AE"]
 MARK_COUNTS = ["NA_COUNT", "AS_COUNT", "AN_COUNT", "AE_COUNT"]
-SUBJ_NAMES = ["CAT", "CAST", "ANG", "MAT", "BG", "FQ", "TD", "CS", "MUS", "EDF", "OPT", "PG_I", "PG_II", "COMP_DIG", "COMP_PERS", "COMP_CIUT", "COMP_EMPR"]
+SUBJ_NAMES = ["CAT", "CAST", "ANG", "MAT", "BG", "FQ", "TD", "CS", "MUS", "EDF", "EVCE", "OPT", "PG_I", "PG_II", "COMP_DIG", "COMP_PERS", "COMP_CIUT", "COMP_EMPR"]
 COL_NAMES={
 "Identificador de l'alumne/a": "id",
 "Nom i cognoms de l'alumne/a": "NOM",
@@ -23,6 +23,7 @@ COL_NAMES={
 "CS:GH": "CS",
 "Mús.": "MUS",
 "Ed. Fís.": "EDF",
+"EVCE": "EVCE",
 "Optativa": "OPT",
 "PG_I": "PG_I",
 "PG_II": "PG_II",
@@ -49,10 +50,10 @@ def digest_data(df:pd.DataFrame)->pd.DataFrame:
     df.columns = df.columns.str.replace(r'\n',' ', regex=True)
     # Remove PI columns
     df = df[df.columns.drop(list(df.filter(regex='PI')))]
+    # Remove 'Altres Matèries' column
+    df = df.drop(columns=['Altres Matèries'], errors='ignore')
     # Rename columns using dictionary
     df.rename(COL_NAMES, axis=1, inplace=True)
-    # Remove columns not present in dictionary
-    df.drop(columns=[col for col in df.columns if col not in COL_NAMES.values()], inplace=True)
     # Mark consistency
     for col in df.columns:
         # consistency for any mark like NA, AS, AN or AE
@@ -76,15 +77,27 @@ def digest_data(df:pd.DataFrame)->pd.DataFrame:
 def pdf_to_table(pdf_file:str, digest=False):
     with pdfplumber.open(pdf_file) as pdf:
         dfs = list()
-        for i in [0, 1]:            
+        opt_column_names = None  # Will store the renamed Optativa columns from first page
+        for i in [0, 2]:            
             # Extract table from the first page
             page = pdf.pages[i]
             table = page.extract_table()
             # Convert to DataFrame and set first row as header
             if table:  # Check if table was extracted
                 df = pd.DataFrame(table[1:], columns=table[0])
-                print(df.columns)
+                print(f"\nPage {i} original columns:", df.columns.tolist())
                 df = df.set_index('N.')
+                # Get all column names and their indices
+                all_cols = df.columns.tolist()
+                # Create new column names using table column indices
+                new_cols = []
+                for idx, col in enumerate(all_cols):
+                    if col == 'Optativa':
+                        new_cols.append(f'Optativa_{idx}')
+                    else:
+                        new_cols.append(col)
+                df.columns = new_cols
+                print(f"After rename on page:", df.columns.tolist())
             else:
                 df = pd.DataFrame()  # Empty DataFrame if no table found
             dfs.append(df)
@@ -93,6 +106,7 @@ def pdf_to_table(pdf_file:str, digest=False):
             df = digest_data(df)
         save_csv(df, pdf_file)
 
+        print("\nFinal columns:", df.columns.tolist())
         print(df.head())
 
 
