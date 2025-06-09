@@ -86,8 +86,8 @@ def process_trimestre_files():
     
     # Procesar cada trimestre
     trimestres = {
-        "T1": "dummy1.csv",
-        "T2": "dummy2.csv",
+        "T1": "T1.csv",
+        "T2": "T2.csv",
         "T3": "dummy3.csv"
     }
     
