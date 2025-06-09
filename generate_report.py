@@ -15,10 +15,11 @@ def load_json_files(trimestre=None):
                 
             with open(os.path.join(docs_dir, filename), 'r', encoding='utf-8') as f:
                 students = json.load(f)
-                # Añadir información del trimestre a cada estudiante
+                # Filter out students with NULL IDs and add trimester info
                 for student in students:
-                    student['trimestre'] = filename.split('.')[0]  # Extraer el trimestre del nombre del archivo
-                all_students.extend(students)
+                    if student['id'].upper() != "NULL" and student['id']:
+                        student['trimestre'] = filename.split('.')[0]  # Extraer el trimestre del nombre del archivo
+                        all_students.append(student)
     
     return all_students
 

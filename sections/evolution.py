@@ -145,10 +145,10 @@ def display_evolution_dashboard(students):
         
         # Convertir calificaciones a valores numéricos para el gráfico
         mark_to_value = {
-            MarkConfig.NA.value: 1,
-            MarkConfig.AS.value: 2,
-            MarkConfig.AN.value: 3,
-            MarkConfig.AE.value: 4
+            MarkConfig.NA.value: 2.5,  # NA = 2.5
+            MarkConfig.AS.value: 5.0,  # AS = 5.0
+            MarkConfig.AN.value: 7.0,  # AN = 7.0
+            MarkConfig.AE.value: 10.0  # AE = 10.0
         }
         df['Valor'] = df['Qualificació'].map(mark_to_value)
         
@@ -173,9 +173,9 @@ def display_evolution_dashboard(students):
             xaxis_title="Trimestre",
             yaxis_title="Qualificació",
             yaxis=dict(
-                range=[0.5, 4.5],
+                range=[0, 10.5],
                 ticktext=["NA", "AS", "AN", "AE"],
-                tickvals=[1, 2, 3, 4]
+                tickvals=[2.5, 5.0, 7.0, 10.0]
             ),
             height=600,
             showlegend=True,
@@ -220,12 +220,41 @@ def display_evolution_dashboard(students):
         
         # Convertir calificaciones a valores numéricos para el gráfico
         mark_to_value = {
-            MarkConfig.NA.value: 1,
-            MarkConfig.AS.value: 2,
-            MarkConfig.AN.value: 3,
-            MarkConfig.AE.value: 4
+            MarkConfig.NA.value: 2.5,  # NA = 2.5
+            MarkConfig.AS.value: 5.0,  # AS = 5.0
+            MarkConfig.AN.value: 7.0,  # AN = 7.0
+            MarkConfig.AE.value: 10.0  # AE = 10.0
         }
         df['Valor'] = df['Qualificació'].map(mark_to_value)
+        
+        # Mostrar resumen de evolución al principio
+        st.subheader("Resum d'evolució")
+        
+        # Calcular promedio por trimestre
+        trimester_avgs = df.groupby('Trimestre')['Valor'].mean()
+        
+        # Mostrar métricas con indicadores de evolución
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if 'T1' in trimester_avgs:
+                avg_value = trimester_avgs['T1']
+                st.metric("Promig T1", f"{avg_value:.1f}")
+            else:
+                st.metric("Promig T1", "No disponible")
+        with col2:
+            if 'T2' in trimester_avgs:
+                avg_value = trimester_avgs['T2']
+                delta = avg_value - trimester_avgs.get('T1', avg_value)
+                st.metric("Promig T2", f"{avg_value:.1f}", delta=f"{delta:+.1f}")
+            else:
+                st.metric("Promig T2", "No disponible")
+        with col3:
+            if 'T3' in trimester_avgs:
+                avg_value = trimester_avgs['T3']
+                delta = avg_value - trimester_avgs.get('T2', avg_value)
+                st.metric("Promig T3", f"{avg_value:.1f}", delta=f"{delta:+.1f}")
+            else:
+                st.metric("Promig T3", "No disponible")
         
         # Crear gráfico de evolución
         fig = go.Figure()
@@ -248,9 +277,9 @@ def display_evolution_dashboard(students):
             xaxis_title="Trimestre",
             yaxis_title="Qualificació",
             yaxis=dict(
-                range=[0.5, 4.5],
+                range=[0, 10.5],
                 ticktext=["NA", "AS", "AN", "AE"],
-                tickvals=[1, 2, 3, 4]
+                tickvals=[2.5, 5.0, 7.0, 10.0]
             ),
             height=600,
             showlegend=True,
@@ -278,8 +307,20 @@ def display_evolution_dashboard(students):
         # Mostrar métricas
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Promig T1", MarkConfig.get_mark_from_height(trimester_avgs.get('T1', 0)))
+            if 'T1' in trimester_avgs:
+                avg_value = trimester_avgs['T1']
+                st.metric("Promig T1", f"{avg_value:.1f}")
+            else:
+                st.metric("Promig T1", "No disponible")
         with col2:
-            st.metric("Promig T2", MarkConfig.get_mark_from_height(trimester_avgs.get('T2', 0)))
+            if 'T2' in trimester_avgs:
+                avg_value = trimester_avgs['T2']
+                st.metric("Promig T2", f"{avg_value:.1f}")
+            else:
+                st.metric("Promig T2", "No disponible")
         with col3:
-            st.metric("Promig T3", MarkConfig.get_mark_from_height(trimester_avgs.get('T3', 0))) 
+            if 'T3' in trimester_avgs:
+                avg_value = trimester_avgs['T3']
+                st.metric("Promig T3", f"{avg_value:.1f}")
+            else:
+                st.metric("Promig T3", "No disponible") 

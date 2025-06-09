@@ -14,9 +14,14 @@ def process_csv_to_json(csv_file: str, json_file: str, trimestre: str = None) ->
                         
             for row in csv_reader:
                 try:
+                    # Get student ID and skip if NULL
+                    student_id = row.get("id", row.get("ID", ""))
+                    if student_id.upper() == "NULL" or not student_id:
+                        continue
+                        
                     # Create student dictionary with more flexible field names
                     student = {
-                        "id": row.get("id", row.get("ID", "")),
+                        "id": student_id,
                         "nom_cognoms": row.get("nom_cognoms", row.get("NOM_COGNOMS", "")),
                         "materies": [],
                         "comentari_general": row.get("comentari general", row.get("COMENTARI GENERAL", "")),
