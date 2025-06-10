@@ -2,116 +2,148 @@ import csv
 import json
 import os
 from typing import Dict, List, Set
+import pandas as pd
+import streamlit as st
 
-def process_csv_to_json(csv_file: str, json_file: str, trimestre: str = None) -> None:
-    # List to store all students data
-    students_data = []
-    
+def process_csv_to_json(csv_file, output_file, trimestre):
+    """Process a single CSV file and convert it to JSON format"""
     try:
-        with open(csv_file, 'r', encoding='utf-8') as file:
-            # Read CSV file with custom delimiter and quote character
-            csv_reader = csv.DictReader(file, delimiter='|', quotechar='"')
-                        
-            for row in csv_reader:
-                try:
-                    # Get student ID and skip if NULL
-                    student_id = row.get("id", row.get("ID", ""))
-                    if student_id.upper() == "NULL" or not student_id:
-                        continue
-                        
-                    # Create student dictionary with more flexible field names
-                    student = {
-                        "id": student_id,
-                        "nom_cognoms": row.get("nom_cognoms", row.get("NOM_COGNOMS", "")),
-                        "materies": [],
-                        "comentari_general": row.get("comentari general", row.get("COMENTARI GENERAL", "")),
-                        "trimestre": trimestre  # Añadir información del trimestre
-                    }
-                    
-                    # Process subjects (up to 100)
-                    for i in range(1, 101):
-                        m_key = f"m{i}"
-                        q_key = f"q{i}"
-                        c_key = f"c{i}"
-                        
-                        # Check if the subject exists in the row
-                        if m_key in row and row[m_key]:
-                            subject = {
-                                "materia": row[m_key],
-                                "qualificacio": row.get(q_key, ""),
-                                "comentari": row.get(c_key, "")
-                            }
-                            student["materies"].append(subject)
-                    
-                    students_data.append(student)
-                except Exception as row_error:
-                    print(f"Error processing row: {row}")
-                    print(f"Row error details: {str(row_error)}")
-                    continue
+        # Read CSV file
+        df = pd.read_csv(csv_file, encoding='utf-8')
         
-        # Write to JSON file
-        with open(json_file, 'w', encoding='utf-8') as f:
-            json.dump(students_data, f, ensure_ascii=False, indent=2)
+        # Convert DataFrame to list of dictionaries
+        students = []
+        for _, row in df.iterrows():
+            student = {
+                'id': str(row['id']),
+                'name': row['name'],
+                'trimestre': trimestre
+            }
             
-    except FileNotFoundError:
-        print(f"Error: Could not find the CSV file at {csv_file}")
-        raise
-    except Exception as e:
-        print(f"Error reading CSV file: {str(e)}")
-        raise
-
-def get_unique_subjects(csv_file: str) -> Set[str]:
-    unique_subjects = set()
-    
-    try:
-        with open(csv_file, 'r', encoding='utf-8') as file:
-            csv_reader = csv.DictReader(file, delimiter='|', quotechar='"')
+            # Add all other columns as fields
+            for col in df.columns:
+                if col not in ['id', 'name']:
+                    student[col] = row[col]
             
-            for row in csv_reader:
-                # Process subjects (up to 100)
-                for i in range(1, 101):
-                    m_key = f"m{i}"
-                    if m_key in row and row[m_key]:
-                        unique_subjects.add(row[m_key])
-                        
-    except FileNotFoundError:
-        print(f"Error: Could not find the CSV file at {csv_file}")
-        raise
+            students.append(student)
+        
+        # Convert to JSON string
+        json_data = json.dumps(students, ensure_ascii=False, indent=2)
+        
+        # Create a download button for the JSON file
+        st.download_button(
+            label=f"Descarregar {trimestre}.json",
+            data=json_data,
+            file_name=f"{trimestre}.json",
+            mime="application/json"
+        )
+        
+        print(f"Successfully processed {csv_file}")
+            
+        return True, f"Successfully processed {csv_file}"
+        
     except Exception as e:
-        print(f"Error reading CSV file: {str(e)}")
-        raise
-        
-    return unique_subjects
+        return False, f"Error processing {csv_file}: {str(e)}"
 
-def process_trimestre_files():
-    """Procesa los archivos CSV de cada trimestre y los convierte a JSON"""
-    # Get the parent directory path
-    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    docs_dir = os.path.join(parent_dir, "docs")
+def process_trimestre_files(csv_files, output_dir):
+    """Process multiple CSV files for different trimesters"""
+    results = []
     
-    # Procesar cada trimestre
-    trimestres = {
-        "T1": "T1.csv",
-        "T2": "T2.csv",
-        "T3": "dummy3.csv"
-    }
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
     
-    for trimestre, csv_file in trimestres.items():
-        input_csv = os.path.join(docs_dir, csv_file)
-        output_json = os.path.join(docs_dir, f"{trimestre}.json")
+    # Process each CSV file
+    for csv_file in csv_files:
+        # Get the base name without extension
+        base_name = os.path.splitext(os.path.basename(csv_file))[0]
         
-        try:
-            # Get and print unique subjects
-            unique_subjects = get_unique_subjects(input_csv)
-            # print(f"\nMaterias únicas encontradas en {trimestre}:")
-            # for subject in sorted(unique_subjects):
-            #     print(f"- {subject}")
-                
-            # Process CSV to JSON
-            process_csv_to_json(input_csv, output_json, trimestre)
-            print(f"\nConversión completada con éxito para {trimestre}. Output guardado en {output_json}")
-        except Exception as e:
-            print(f"Error procesando {trimestre}: {str(e)}")
+        # Map the base name to T1, T2, or T3
+        trimester_map = {
+            '1r': 'T1',
+            '2n': 'T2',
+            '3r': 'T3'
+        }
+        
+        # Extract trimester from base name
+        trimester = None
+        for key, value in trimester_map.items():
+            if key in base_name.lower():
+                trimester = value
+                break
+        
+        if trimester is None:
+            results.append((False, f"Could not determine trimester for {csv_file}. The filename must contain '1r', '2n', or '3r' to indicate the trimester."))
+            continue
+        
+        # Create output file name
+        output_file = os.path.join(output_dir, f"{trimester}.json")
+        
+        # Process the file
+        success, message = process_csv_to_json(csv_file, output_file, trimester)
+        results.append((success, message))
+    
+    return results
+
+def main():
+    st.set_page_config(layout="wide")
+    st.title("Conversor de CSV a JSON")
+    
+    # Get current directory
+    current_dir = os.getcwd()
+    
+    # Create a text input for the directory path
+    working_dir = st.text_input(
+        "Selecciona el directori que conté els fitxers CSV (han de contenir '1r', '2n' o '3r' al nom)",
+        value=current_dir
+    )
+    
+    if not os.path.exists(working_dir):
+        st.error("El directori no existeix")
+        return
+    
+    # Get all CSV files in the selected directory
+    csv_files = [f for f in os.listdir(working_dir) if f.endswith('.csv')]
+    
+    if not csv_files:
+        st.error(f"No s'han trobat fitxers CSV al directori '{working_dir}'")
+        return
+    
+    # Create a multiselect for CSV files
+    selected_files = st.multiselect(
+        "Selecciona els fitxers CSV a convertir (han de contenir '1r', '2n' o '3r' al nom)",
+        csv_files,
+        default=csv_files  # Select all files by default
+    )
+    
+    if not selected_files:
+        st.warning("Selecciona almenys un fitxer CSV per convertir")
+        return
+    
+    # Display selected files
+    st.subheader("Fitxers seleccionats:")
+    for file in selected_files:
+        st.write(f"📄 {file}")
+    
+    # Process files when button is clicked
+    if st.button("Convertir a JSON"):
+        # Show progress
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        # Process files
+        full_paths = [os.path.join(working_dir, f) for f in selected_files]
+        results = process_trimestre_files(full_paths, working_dir)
+        
+        # Display results
+        st.subheader("Resultats de la conversió:")
+        for i, (success, message) in enumerate(results):
+            if success:
+                st.success(message)
+            else:
+                st.error(message)
+            progress_bar.progress((i + 1) / len(results))
+        
+        st.success("Conversió completada!")
 
 if __name__ == "__main__":
-    process_trimestre_files() 
+    main() 
