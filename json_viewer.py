@@ -112,12 +112,10 @@ def main():
         
         with tab1:
             col1, col2 = st.columns(2)
-            with col1:
-                display_group_statistics(students)
-            with col2:
-                group_failure_table(students)
-                display_subjects_bar_chart(students)
-                display_student_subject_heatmap(students)
+            display_group_statistics(students)
+            group_failure_table(students)
+            display_subjects_bar_chart(students)
+            display_student_subject_heatmap(students)
             display_student_ranking(students)
         
         with tab2:

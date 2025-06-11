@@ -311,8 +311,10 @@ def group_failure_table(students):
             "Alumnes": '; '.join(names)
         })
     st.subheader("Resum de suspensos per alumne")
-    st.dataframe(data, hide_index=True)
-    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.dataframe(data, hide_index=True)
+        
     # Pie chart for categories
     labels = [row["Categoria"] for row in data]
     values = [row["Nº d'alumnes"] for row in data]
@@ -327,11 +329,9 @@ def group_failure_table(students):
     )])
     fig.update_layout(
         showlegend=False,
-        height=500,
-        margin=dict(t=50, b=50, l=50, r=50)
     )
-    st.subheader("Distribució d'alumnes per categoria (Diagrama de sectors)")
-    st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        st.plotly_chart(fig, use_container_width=True)
 
 
 def display_subjects_bar_chart(students):
