@@ -17,6 +17,7 @@ from utils.constants import MarkConfig
 import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
+from csv_converter import main as csv_converter_main
 
 def get_json_files(directory):
     """Get all JSON files in the directory"""
@@ -49,93 +50,102 @@ def load_json_files(directory, selected_files, trimestre=None):
 
 def main():
     st.set_page_config(layout="wide")
-    st.title("Sistema de Visualització de Notes")
     
-    # Get current directory
-    current_dir = os.getcwd()
-    
-    # Create a text input for the directory path
-    working_dir = st.text_input(
-        "Selecciona el directori que conté els fitxers JSON (T1.json, T2.json, T3.json)",
-        value=current_dir
+    # Sidebar menu
+    menu = st.sidebar.selectbox(
+        "Menú",
+        ["Estadísticas", "Convertir CSV"]
     )
     
-    if not os.path.exists(working_dir):
-        st.error("El directori no existeix")
-        return
-    
-    # Get all JSON files in the selected directory
-    json_files = get_json_files(working_dir)
-    
-    if not json_files:
-        st.error(f"No s'han trobat fitxers JSON (T1.json, T2.json, T3.json) al directori '{working_dir}'")
-        return
-    
-    # Create a multiselect for JSON files
-    selected_files = st.multiselect(
-        "Selecciona els fitxers JSON a visualitzar",
-        json_files,
-        default=json_files  # Select all files by default
-    )
-    
-    if not selected_files:
-        st.warning("Selecciona almenys un fitxer JSON per visualitzar")
-        return
-    
-    # Display selected files
-    st.subheader("Fitxers seleccionats:")
-    for file in selected_files:
-        st.write(f"📄 {file}")
-    
-    # Create options for trimester selector
-    trimester_options = ["Tots"] + selected_files
-    
-    # Selector de trimestre
-    trimestre = st.selectbox(
-        "Selecciona el trimestre",
-        trimester_options,
-        index=0,  # Por defecto mostrar todos
-        key="trimester_selector"
-    )
-    
-    # Cargar estudiantes según el trimestre seleccionado
-    if trimestre == "Tots":
-        students = load_json_files(working_dir, selected_files)
-    else:
-        students = load_json_files(working_dir, [trimestre])
-    
-    # Create tabs for different views
-    tab1, tab2, tab3, tab4 = st.tabs(["Grup", "Materia", "Alumne", "Evolució"])
-    
-    with tab1:
-        col1, col2 = st.columns(2)
-        with col1:
-            display_group_statistics(students)
-        with col2:
-            group_failure_table(students)
-            display_subjects_bar_chart(students)
-            display_student_subject_heatmap(students)
-        display_student_ranking(students)
-    
-    with tab2:
-        # Display subject statistics
-        display_subject_statistics(students)
-    
-    with tab3:    
-        # Display student selector and get selected student data
-        selected_student_data = display_student_selector(students)
-        col1, col2 = st.columns(2)
-        with col1:
-            # Display student marks
-            display_student_marks(selected_student_data)
-        with col2:
-            # Display pie chart of marks
-            display_marks_pie_chart(selected_student_data)
+    if menu == "Estadísticas":
+        st.title("Sistema de Visualització de Notes")
         
-    with tab4:
-        # Load all trimesters for evolution comparison
-        all_trimesters = load_json_files(working_dir, selected_files)
-        display_evolution_dashboard(all_trimesters)
+        # Get current directory
+        current_dir = os.getcwd()
+        
+        # Create a text input for the directory path
+        working_dir = st.text_input(
+            "Selecciona el directori que conté els fitxers JSON (T1.json, T2.json, T3.json)",
+            value=current_dir
+        )
+        
+        if not os.path.exists(working_dir):
+            st.error("El directori no existeix")
+            return
+        
+        # Get all JSON files in the selected directory
+        json_files = get_json_files(working_dir)
+        
+        if not json_files:
+            st.error(f"No s'han trobat fitxers JSON (T1.json, T2.json, T3.json) al directori '{working_dir}'")
+            return
+        
+        # Create a multiselect for JSON files
+        selected_files = st.multiselect(
+            "Selecciona els fitxers JSON a visualitzar",
+            json_files,
+            default=json_files  # Select all files by default
+        )
+        
+        if not selected_files:
+            st.warning("Selecciona almenys un fitxer JSON per visualitzar")
+            return
+        
+        # Display selected files
+        st.subheader("Fitxers seleccionats:")
+        for file in selected_files:
+            st.write(f"📄 {file}")
+        
+        # Selector de trimestre
+        trimestre = st.selectbox(
+            "Selecciona el trimestre",
+            selected_files,
+            index=0,
+            key="trimester_selector"
+        )
+        
+        # Cargar estudiantes según el trimestre seleccionado
+        students = load_json_files(working_dir, [trimestre])
+        
+        # Create tabs for different views
+        tab1, tab2, tab3, tab4 = st.tabs(["Grup", "Materia", "Alumne", "Evolució"])
+        
+        with tab1:
+            col1, col2 = st.columns(2)
+            with col1:
+                display_group_statistics(students)
+            with col2:
+                group_failure_table(students)
+                display_subjects_bar_chart(students)
+                display_student_subject_heatmap(students)
+            display_student_ranking(students)
+        
+        with tab2:
+            # Display subject statistics
+            display_subject_statistics(students)
+        
+        with tab3:    
+            # Display student selector and get selected student data
+            selected_student_data = display_student_selector(students)
+            col1, col2 = st.columns(2)
+            with col1:
+                # Display student marks
+                display_student_marks(selected_student_data)
+            with col2:
+                # Display pie chart of marks
+                display_marks_pie_chart(selected_student_data)
+            
+        with tab4:
+            # Load all trimesters for evolution comparison
+            all_trimesters = load_json_files(working_dir, selected_files)
+            if len(all_trimesters) < 2:
+                st.warning("Es necessiten almenys dos trimestres per visualitzar l'evolució")
+            else:
+                display_evolution_dashboard(all_trimesters)
+    
+    elif menu == "Convertir CSV":
+        st.title("Convertir CSV")
+        csv_converter_main()
 
 if __name__ == "__main__":
     main() 
