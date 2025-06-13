@@ -1,6 +1,20 @@
-# Eina d'Extracció i Anàlisi d'Informes Acadèmics
+# Metrika - Eina d'Extracció i Anàlisi d'Informes Acadèmics
 
 Una aplicació web basada en Streamlit per analitzar i visualitzar dades del rendiment acadèmic dels estudiants a partir d'informes escolars.
+
+## Com funciona
+
+Metrika funciona en dos passos principals:
+
+1. **Convertir CSV a JSON**
+   - Primer, has d'anar a la secció "Convertir CSV" del menú lateral
+   - Aquí podràs convertir el fitxer CSV extret de les actes d'Esfera a format JSON
+   - Aquests fitxers JSON són els que Metrika utilitza per mostrar les estadístiques
+
+2. **Visualitzar Estadístiques**
+   - Un cop tinguis els fitxers JSON, ves a la secció "Estadístiques"
+   - Introdueix el path a la carpeta que conté els fitxers JSON (T1.json, T2.json, T3.json)
+   - Podràs veure totes les estadístiques i visualitzacions disponibles
 
 ## Característiques
 
@@ -108,7 +122,20 @@ El projecte utilitza diversos paquets Python clau:
 
 ## Llicència
 
-[Especifica la teva llicència aquí]
+Copyright (C) 2024  Metrika
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ## Contacte
 
