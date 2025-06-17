@@ -116,7 +116,7 @@ def process_csv_to_json(csv_file, output_file, trimestre):
             return False, f"No s'han trobat dades vàlides a {csv_file}", None
         
         # Validate that required columns exist
-        required_columns = ['id', 'nom_cognoms', 'numero_avaluacio']
+        required_columns = ['id', 'nom_cognoms', 'numero_avaluacio', 'comentari general']
         missing_columns = [col for col in required_columns if col not in df.columns]
         if missing_columns:
             logger.error(f"Falten columnes requerides a {csv_file}: {missing_columns}")
@@ -178,13 +178,15 @@ def process_csv_to_json(csv_file, output_file, trimestre):
                 
                 # Add all other columns as fields (excluding materias columns)
                 for col in df.columns:
-                    if col not in ['id', 'nom_cognoms', 'numero_avaluacio'] and not col.startswith('m') and not col.startswith('q') and not col.startswith('c'):
+                    if col not in ['id', 'nom_cognoms', 'numero_avaluacio', 'comentari general'] and not col.startswith('m') and not col.startswith('q') and not col.startswith('c'):
                         value = row[col]
                         # Handle NaN values
                         if pd.isna(value):
                             student[col] = ""
                         else:
                             student[col] = str(value).strip()
+                
+                student['comentari_general'] = str(row['comentari general']).strip()
                 
                 students.append(student)
                 if i < 3: # Show first 3 students for debugging
