@@ -140,9 +140,9 @@ def process_csv_to_json(csv_file, output_file, trimestre):
                     'nom_cognoms': str(row['nom_cognoms']).strip()
                 }
                 
-                # Process materias array
-                materias = []
-                for j in range(1, 101):  # Check up to 100 materias
+                # Process materies array
+                materies = []
+                for j in range(1, 101):  # Check up to 100 materies
                     materia_col = f'm{j}'
                     qualificacio_col = f'q{j}'
                     comentari_col = f'c{j}'
@@ -166,16 +166,16 @@ def process_csv_to_json(csv_file, output_file, trimestre):
                                     comentari_value = str(com_value).strip()
                             
                             # Add materia to array
-                            materias.append({
+                            materies.append({
                                 'materia': str(materia_value).strip(),
                                 'qualificacio': qualificacio_value,
                                 'comentari': comentari_value
                             })
                 
-                # Add materias array to student
-                student['materias'] = materias
+                # Add materies array to student
+                student['materies'] = materies
                 
-                # Add all other columns as fields (excluding materias columns)
+                # Add all other columns as fields (excluding materies columns)
                 for col in df.columns:
                     if col not in ['id', 'nom_cognoms', 'numero_avaluacio', 'comentari general'] and not col.startswith('m') and not col.startswith('q') and not col.startswith('c'):
                         value = row[col]

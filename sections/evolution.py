@@ -165,13 +165,13 @@ def display_evolution_dashboard(students):
     )
     
     if viz_type == "Per Materia":
-        # Obtener lista única de materias
-        materias = sorted(df['Materia'].unique())
+        # Obtener lista única de materies
+        materies = sorted(df['Materia'].unique())
         
         # Selector de materia
         materia_seleccionada = st.selectbox(
             "Selecciona una materia",
-            materias
+            materies
         )
         
         # Filtrar datos para la materia seleccionada

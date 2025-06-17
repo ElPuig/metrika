@@ -106,6 +106,18 @@ class AppConfig(Enum):
     MAX_SIZE = 100
     MIN_SIZE = 10
 
+    # Application version (Semantic Versioning: MAJOR.MINOR.PATCH)
+    VERSION = "1.0.0"
+    
+    # Application name
+    APP_NAME = "Sistema de Visualització de Notes"
+    
+    # Version description
+    VERSION_DESCRIPTION = "Primera versió estable amb suport per a estructura JSON millorada"
+    
+    # Minimum compatible version (for backward compatibility)
+    MIN_COMPATIBLE_VERSION = "1.0.0"
+
 
 class TestConfig(Enum):
     TEST_CSV_FILE1_PATH="docs/dummy1.csv" # T1

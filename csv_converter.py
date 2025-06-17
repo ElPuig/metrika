@@ -5,6 +5,7 @@ from utils.csv_to_json import process_csv_to_json
 import tempfile
 from datetime import datetime
 import json
+from utils.constants import AppConfig
 
 # Configure logging to write to file in docs/ directory
 log_dir = os.path.join(os.getcwd(), 'docs')
@@ -289,7 +290,8 @@ def main():
                     final_json_structure = {
                         "grup": grup_name,
                         "trimestre": trimestre_name,
-                        "estudiants": students_data
+                        "estudiants": students_data,
+                        "metrika_version": AppConfig.VERSION
                     }
                     
                     # Convert back to JSON string

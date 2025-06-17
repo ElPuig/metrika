@@ -49,7 +49,7 @@ def test_csv_conversion():
                 # New structure
                 print(f"   - Grup: {data.get('grup', 'No especificat')}")
                 print(f"   - Trimestre: {data.get('trimestre', 'No especificat')}")
-                print(f"   - Nombre d'estudiants: {len(data['students'])}")
+                print(f"   - Nombre d'estudiants: {len(data['estudiants'])}")
                 
                 # Display first student details
                 if data['estudiants']:
@@ -57,10 +57,10 @@ def test_csv_conversion():
                     print(f"\n👤 Primer estudiant:")
                     print(f"   - ID: {first_student['id']}")
                     print(f"   - Nom: {first_student['nom_cognoms']}")
-                    print(f"   - Nombre de matèries: {len(first_student['materias'])}")
+                    print(f"   - Nombre de matèries: {len(first_student['materies'])}")
                     
                     print(f"\n📚 Matèries del primer estudiant:")
-                    for i, materia in enumerate(first_student['materias'], 1):
+                    for i, materia in enumerate(first_student['materies'], 1):
                         print(f"   {i}. {materia['materia']}")
                         print(f"      Qualificació: {materia['qualificacio']}")
                         print(f"      Comentari: {materia['comentari']}")
@@ -75,10 +75,10 @@ def test_csv_conversion():
                     print(f"\n👤 Primer estudiant:")
                     print(f"   - ID: {first_student['id']}")
                     print(f"   - Nom: {first_student['nom_cognoms']}")
-                    print(f"   - Nombre de matèries: {len(first_student['materias'])}")
+                    print(f"   - Nombre de matèries: {len(first_student['materies'])}")
                     
                     print(f"\n📚 Matèries del primer estudiant:")
-                    for i, materia in enumerate(first_student['materias'], 1):
+                    for i, materia in enumerate(first_student['materies'], 1):
                         print(f"   {i}. {materia['materia']}")
                         print(f"      Qualificació: {materia['qualificacio']}")
                         print(f"      Comentari: {materia['comentari']}")
@@ -111,9 +111,9 @@ def test_csv_conversion():
                             if field not in student:
                                 validation_errors.append(f"Estudiant {i}: Falta el camp '{field}'")
                         
-                        # Check materias structure
-                        if 'materias' in student:
-                            for j, materia in enumerate(student['materias']):
+                        # Check materies structure
+                        if 'materies' in student:
+                            for j, materia in enumerate(student['materies']):
                                 materia_fields = ['materia', 'qualificacio', 'comentari']
                                 for field in materia_fields:
                                     if field not in materia:
@@ -131,9 +131,9 @@ def test_csv_conversion():
                         if field not in student:
                             validation_errors.append(f"Estudiant {i}: Falta el camp '{field}'")
                     
-                    # Check materias structure
-                    if 'materias' in student:
-                        for j, materia in enumerate(student['materias']):
+                    # Check materies structure
+                    if 'materies' in student:
+                        for j, materia in enumerate(student['materies']):
                             materia_fields = ['materia', 'qualificacio', 'comentari']
                             for field in materia_fields:
                                 if field not in materia:

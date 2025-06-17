@@ -354,7 +354,7 @@ def display_subjects_bar_chart(students):
     if third_year:
         selected_courses.append("3r")
 
-    # Obtener todas las materias filtradas por curso
+    # Obtener todas las materies filtradas por curso
     all_subjects = set()
     for student in students:
         for m in student['materies']:
