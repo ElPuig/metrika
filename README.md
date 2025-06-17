@@ -33,6 +33,8 @@ Metrika funciona en dos passos principals:
 - Exportació de dades a altres formats
 - Integració amb sistemes externs
 - Gestió d'usuaris i permisos
+- Filtres per 4t d'ESO
+- Adaptació per Batxillerat i CCFF
 
 ## Estructura del Projecte
 
@@ -136,7 +138,3 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-## Contacte
-
-[La teva informació de contacte] 
