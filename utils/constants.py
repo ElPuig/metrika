@@ -100,7 +100,10 @@ class DataConfig(Enum):
         return None
 
 
-class AppConfig(Enum):
+class AppConfig:
+    """Application configuration and versioning"""
+    
+    # Application title and theme
     APP_TITLE = "Visualizador Esfera"
     THEME_COLOR = "#FF4B4B"
     MAX_SIZE = 100
@@ -110,7 +113,7 @@ class AppConfig(Enum):
     VERSION = "1.0.0"
     
     # Application name
-    APP_NAME = "Sistema de Visualització de Notes"
+    APP_NAME = "Metrika"
     
     # Version description
     VERSION_DESCRIPTION = "Primera versió estable amb suport per a estructura JSON millorada"

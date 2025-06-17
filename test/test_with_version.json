@@ -1,0 +1,39 @@
+{
+  "grup": "3B",
+  "trimestre": "Primer trimestre",
+  "estudiants": [
+    {
+      "id": "12345",
+      "nom_cognoms": "Joan Pérez García",
+      "materies": [
+        {
+          "materia": "Matemàtiques",
+          "qualificacio": "Assoliment notable",
+          "comentari": "Bon treball en general"
+        },
+        {
+          "materia": "Català",
+          "qualificacio": "Assoliment satisfactori",
+          "comentari": "Ha de millorar l'expressió escrita"
+        }
+      ]
+    },
+    {
+      "id": "67890",
+      "nom_cognoms": "Maria López Sánchez",
+      "materies": [
+        {
+          "materia": "Matemàtiques",
+          "qualificacio": "Assoliment excel·lent",
+          "comentari": "Excel·lent domini de la matèria"
+        },
+        {
+          "materia": "Català",
+          "qualificacio": "Assoliment notable",
+          "comentari": "Bona expressió escrita"
+        }
+      ]
+    }
+  ],
+  "metrika_version": "1.0.0"
+} 

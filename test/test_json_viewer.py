@@ -43,6 +43,7 @@ def test_json_viewer():
             print(f"     Display name: {info['display_name']}")
             print(f"     Grup: {info['grup']}")
             print(f"     Trimestre: {info['trimestre']}")
+            print(f"     Versió: {info['version']}")
         
         # Validate student data
         print(f"\n🔍 Validant dades dels estudiants...")

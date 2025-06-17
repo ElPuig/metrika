@@ -13,7 +13,7 @@ from sections.visualization import (
     display_subject_statistics
 )
 from sections.evolution import display_evolution_dashboard
-from utils.constants import MarkConfig
+from utils.constants import MarkConfig, AppConfig
 import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
@@ -22,6 +22,21 @@ import logging
 
 # logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+def compare_versions(version1, version2):
+    """Compare two semantic versions and return -1, 0, or 1"""
+    def version_to_tuple(version):
+        return tuple(map(int, version.split('.')))
+    
+    v1_tuple = version_to_tuple(version1)
+    v2_tuple = version_to_tuple(version2)
+    
+    if v1_tuple < v2_tuple:
+        return -1
+    elif v1_tuple > v2_tuple:
+        return 1
+    else:
+        return 0
 
 def get_json_files(directory):
     """Get all JSON files in the directory"""
@@ -35,6 +50,7 @@ def load_json_files(directory, selected_files, trimestre=None):
     """Load selected JSON files, optionally filtered by trimester"""
     all_students = []
     file_info = {}  # Store file metadata for display
+    version_warnings = []  # Store version compatibility warnings
     
     for filename in selected_files:
         try:
@@ -47,13 +63,21 @@ def load_json_files(directory, selected_files, trimestre=None):
                     students = data['estudiants']
                     grup = data.get('grup', 'Grup desconegut')
                     trimestre_name = data.get('trimestre', 'Trimestre desconegut')
+                    file_version = data.get('metrika_version', '0.0.0')
+                    
+                    # Check version compatibility
+                    if compare_versions(file_version, AppConfig.MIN_COMPATIBLE_VERSION) < 0:
+                        version_warnings.append(f"⚠️ {filename}: Versió {file_version} és anterior a la versió mínima compatible ({AppConfig.MIN_COMPATIBLE_VERSION})")
+                    elif compare_versions(file_version, AppConfig.VERSION) > 0:
+                        version_warnings.append(f"⚠️ {filename}: Versió {file_version} és posterior a la versió actual ({AppConfig.VERSION})")
                     
                     # Create display name: grup_trimestre
                     display_name = f"{grup}_{trimestre_name}"
                     file_info[filename] = {
                         'display_name': display_name,
                         'grup': grup,
-                        'trimestre': trimestre_name
+                        'trimestre': trimestre_name,
+                        'version': file_version
                     }
                     
                     # Filter out students with NULL IDs and add trimester info
@@ -73,8 +97,12 @@ def load_json_files(directory, selected_files, trimestre=None):
                     file_info[filename] = {
                         'display_name': display_name,
                         'grup': 'Grup Antic',
-                        'trimestre': trimestre_from_filename
+                        'trimestre': trimestre_from_filename,
+                        'version': '0.0.0'  # Old files don't have version
                     }
+                    
+                    # Add warning for old format
+                    version_warnings.append(f"⚠️ {filename}: Format antic sense informació de versió")
                     
                     # Filter out students with NULL IDs and add trimester info
                     for student in data:
@@ -91,10 +119,25 @@ def load_json_files(directory, selected_files, trimestre=None):
             st.error(f"Error carregant el fitxer {filename}: {str(e)}")
             continue
     
-    return all_students, file_info
+    return all_students, file_info, version_warnings
 
 def main():
     st.set_page_config(layout="wide")
+    
+    # Sidebar with version information
+    with st.sidebar:
+        st.markdown("---")
+        st.markdown("### 📊 Informació de l'aplicació")
+        
+        # Version info with icon
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            st.markdown("ℹ️")
+        with col2:
+            st.markdown(f"**Versió:** {AppConfig.VERSION}")
+            st.markdown(f"**Nom:** {AppConfig.APP_NAME}")
+        
+        st.markdown("---")
     
     # Sidebar menu
     menu = st.sidebar.selectbox(
@@ -137,11 +180,18 @@ def main():
             return
         
         # Load all files to get their metadata
-        all_students, file_info = load_json_files(working_dir, selected_files)
+        all_students, file_info, version_warnings = load_json_files(working_dir, selected_files)
         
         if not all_students:
             st.error("No s'han pogut carregar estudiants dels fitxers seleccionats")
             return
+        
+        # Show version compatibility warnings
+        if version_warnings:
+            st.warning("**Advertències de compatibilitat de versions:**")
+            for warning in version_warnings:
+                st.markdown(f"• {warning}")
+            st.markdown("---")
         
         # Display selected files with their display names
         st.subheader("Fitxers seleccionats:")
@@ -150,7 +200,8 @@ def main():
                 display_name = file_info[file]['display_name']
                 grup = file_info[file]['grup']
                 trimestre = file_info[file]['trimestre']
-                st.write(f"📄 {file} → {display_name} (Grup: {grup}, Trimestre: {trimestre})")
+                version = file_info[file]['version']
+                st.write(f"📄 {file} → {display_name} (Grup: {grup}, Trimestre: {trimestre}, Versió: {version})")
             else:
                 st.write(f"📄 {file}")
         
@@ -174,7 +225,7 @@ def main():
         )
         
         # Cargar estudiantes según el trimestre seleccionado
-        students, _ = load_json_files(working_dir, [trimestre])
+        students, _, _ = load_json_files(working_dir, [trimestre])
         
         # Create tabs for different views
         tab1, tab2, tab3, tab4 = st.tabs(["Grup", "Materia", "Alumne", "Evolució"])
@@ -204,7 +255,7 @@ def main():
             
         with tab4:
             # Load all trimesters for evolution comparison
-            all_trimesters, _ = load_json_files(working_dir, selected_files)
+            all_trimesters, _, _ = load_json_files(working_dir, selected_files)
             if len(all_trimesters) < 2:
                 st.warning("Es necessiten almenys dos trimestres per visualitzar l'evolució")
             else:

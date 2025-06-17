@@ -94,10 +94,14 @@ def test_csv_conversion():
                 print("📋 Estructura nova detectada (grup, trimestre, estudiants)")
                 
                 # Check top-level fields
-                top_level_fields = ['grup', 'trimestre', 'estudiants']
+                top_level_fields = ['grup', 'trimestre', 'estudiants', 'metrika_version']
                 for field in top_level_fields:
                     if field not in data:
                         validation_errors.append(f"Falta el camp de nivell superior '{field}'")
+                
+                # Check version
+                if 'metrika_version' in data:
+                    print(f"   - Versió del fitxer: {data['metrika_version']}")
                 
                 # Check students array
                 if 'estudiants' in data and isinstance(data['estudiants'], list):
