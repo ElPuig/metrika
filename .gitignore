@@ -141,3 +141,6 @@ frontend/cypress/snapshots/linux/1x
 # sensitive data
 /docs
 
+# vscode and cursor files
+.vscode/
+
