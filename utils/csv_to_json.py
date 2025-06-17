@@ -5,14 +5,78 @@ import logging
 from typing import Dict, List, Set
 import pandas as pd
 import streamlit as st
+import tempfile
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+def clean_csv_line_breaks(csv_file_path):
+    """
+    Clean line breaks within CSV cells by properly parsing quoted cells.
+    Creates a temporary cleaned file and returns its path.
+    """
+    logger.info(f"Cleaning line breaks in {csv_file_path}")
+    
+    # Create a temporary file for the cleaned CSV
+    temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False, encoding='utf-8')
+    temp_file_path = temp_file.name
+    
+    try:
+        # Try different separators to find the right one
+        separators = [',', ';', '|', '\t']
+        best_separator = None
+        best_rows = []
+        
+        for sep in separators:
+            try:
+                with open(csv_file_path, 'r', encoding='utf-8') as input_file:
+                    reader = csv.reader(input_file, delimiter=sep, quotechar='"')
+                    rows = list(reader)
+                    if len(rows) > 0 and len(rows[0]) > 1:  # At least one row with multiple columns
+                        best_separator = sep
+                        best_rows = rows
+                        logger.debug(f"Found valid separator '{sep}' with {len(rows)} rows")
+                        break
+            except Exception as e:
+                logger.debug(f"Separator '{sep}' failed: {str(e)}")
+                continue
+        
+        if best_separator is None:
+            logger.warning("Could not determine CSV separator, returning original file")
+            return csv_file_path
+        
+        # Write cleaned content to temporary file
+        with open(temp_file_path, 'w', encoding='utf-8', newline='') as output_file:
+            writer = csv.writer(output_file, delimiter=best_separator, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            for row in best_rows:
+                # Clean any remaining line breaks within cells
+                cleaned_row = []
+                for cell in row:
+                    if isinstance(cell, str):
+                        # Replace line breaks with spaces within cells
+                        cleaned_cell = cell.replace('\n', ' ').replace('\r', ' ').strip()
+                        cleaned_row.append(cleaned_cell)
+                    else:
+                        cleaned_row.append(cell)
+                writer.writerow(cleaned_row)
+        
+        logger.info(f"Successfully cleaned CSV file using separator '{best_separator}'. Processed {len(best_rows)} rows")
+        return temp_file_path
+        
+    except Exception as e:
+        logger.error(f"Error cleaning CSV file: {str(e)}")
+        # If cleaning fails, return the original file path
+        return csv_file_path
+
 def process_csv_to_json(csv_file, output_file, trimestre):
     """Process a single CSV file and convert it to JSON format"""
     logger.info(f"Starting to process {csv_file}")
+    
+    # Clean line breaks in the CSV file
+    cleaned_csv_file = clean_csv_line_breaks(csv_file)
+    should_delete_temp = cleaned_csv_file != csv_file
+    
     try:
         # Try to detect the correct separator
         separators = [',', ';', '|', '\t']
@@ -22,7 +86,7 @@ def process_csv_to_json(csv_file, output_file, trimestre):
         for sep in separators:
             try:
                 logger.debug(f"Trying separator '{sep}'")
-                df = pd.read_csv(csv_file, encoding='utf-8', sep=sep, on_bad_lines='skip')
+                df = pd.read_csv(cleaned_csv_file, encoding='utf-8', sep=sep, on_bad_lines='skip')
                 # If we can read at least one row, assume this separator is correct
                 if len(df) > 0:
                     logger.info(f"Successfully read {len(df)} rows with separator '{sep}'")
@@ -37,7 +101,7 @@ def process_csv_to_json(csv_file, output_file, trimestre):
         if df is None or len(df) == 0:
             logger.debug("No separator worked, trying default pandas separator")
             try:
-                df = pd.read_csv(csv_file, encoding='utf-8', on_bad_lines='skip')
+                df = pd.read_csv(cleaned_csv_file, encoding='utf-8', on_bad_lines='skip')
                 logger.info(f"Default separator read {len(df)} rows")
             except Exception as e:
                 logger.error(f"Default separator also failed: {str(e)}")
@@ -67,7 +131,7 @@ def process_csv_to_json(csv_file, output_file, trimestre):
                         student[col] = row[col]
                 
                 students.append(student)
-                if i < 3:  # Show first 3 students for debugging
+                if i < 3: # Show first 3 students for debugging
                     logger.debug(f"Student {i}: {student}")
             except Exception as e:
                 logger.error(f"Error processing row {idx}: {str(e)}")
@@ -92,6 +156,14 @@ def process_csv_to_json(csv_file, output_file, trimestre):
     except Exception as e:
         logger.error(f"Exception in process_csv_to_json: {str(e)}")
         return False, f"Error processing {csv_file}: {str(e)}", None
+    finally:
+        # Clean up temporary file if it was created
+        if should_delete_temp and os.path.exists(cleaned_csv_file):
+            try:
+                os.unlink(cleaned_csv_file)
+                logger.debug(f"Cleaned up temporary file: {cleaned_csv_file}")
+            except Exception as e:
+                logger.warning(f"Could not delete temporary file {cleaned_csv_file}: {str(e)}")
 
 def process_trimestre_files(csv_files, output_dir):
     """Process multiple CSV files for different trimesters"""
