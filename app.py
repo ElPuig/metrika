@@ -126,7 +126,12 @@ def load_json_files(directory, selected_files, trimestre=None):
     return all_students, file_info, version_warnings
 
 def main():
-    st.set_page_config(layout="wide")
+    st.set_page_config(
+        page_title=f"{AppConfig.APP_NAME} - Sistema de Visualització de Notes",
+        page_icon="📊",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
     
     # Sidebar with version information
     with st.sidebar:
