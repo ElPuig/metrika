@@ -10,9 +10,9 @@ import json
 # Add parent directory to path to import modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from json_viewer import load_json_files, get_json_files
+from app import load_json_files, get_json_files
 
-def test_json_viewer():
+def test_app():
     """Test the JSON viewer with new structure"""
     
     # Paths
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     print("=" * 60)
     
     # Run test
-    success = test_json_viewer()
+    success = test_app()
     
     print("\n" + "=" * 60)
     if success:

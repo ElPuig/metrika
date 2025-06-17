@@ -39,7 +39,7 @@ Metrika funciona en dos passos principals:
 ## Estructura del Projecte
 
 ```
-├── json_viewer.py         # Utilitats de visualització de dades JSON
+├── app.py         # Aplicació principal
 ├── requirements.txt       # Dependències del projecte
 ├── sections/            # Seccions principals de l'aplicació
 │   ├── evolution.py     # Visualitzacions d'evolució de notes
@@ -78,7 +78,7 @@ pip install -r requirements.txt
 
 1. Inicia l'aplicació Streamlit:
 ```bash
-streamlit run json_viewer.py
+streamlit run app.py
 ```
 
 2. Accedeix a l'aplicació a través del teu navegador web a `http://localhost:8501`
