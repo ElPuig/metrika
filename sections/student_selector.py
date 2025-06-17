@@ -14,7 +14,7 @@ def display_student_selector(students):
     
     # Get the selected student's data
     student_id = selected_student.split("(")[-1].strip(")")
-    selected_student_data = next(student for student in students if student['id'] == student_id)
+    selected_student_data = next(student for student in students if str(student['id']) == student_id)
     
     # Calculate average grade
     mark_to_value = {
