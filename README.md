@@ -60,7 +60,7 @@ Metrika funciona en dos passos principals:
 1. Clona el repositori:
 ```bash
 git clone [url-del-repositori]
-cd esfextraction
+cd metrika
 ```
 
 2. Crea i activa un entorn virtual:
