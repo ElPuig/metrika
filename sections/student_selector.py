@@ -56,10 +56,15 @@ def display_student_selector(students):
             
             # Find most common grade
             most_common = max(grade_counts.items(), key=lambda x: x[1])
+            
+            # Determine color based on most common grade
+            delta_color = "inverse" if most_common[0] == "No assoliment" else "normal"
+            
             st.metric(
                 label="Qualificació més freqüent",
                 value=most_common[0],
-                delta=f"{most_common[1]} assignatures"
+                delta=f"{most_common[1]} assignatures",
+                delta_color=delta_color
             )
         
         with col3:
@@ -69,10 +74,15 @@ def display_student_selector(students):
                                                         "Assoliment notable", 
                                                         "Assoliment excel·lent"])
             pass_rate = (pass_count / len(evaluated_subjects)) * 100
+            
+            # Determine color based on most common grade
+            delta_color = "inverse" if most_common[0] == "No assoliment" else "normal"
+            
             st.metric(
                 label="Taxa d'aprovat",
                 value=f"{pass_rate:.1f}%",
-                delta=f"{pass_count}/{len(evaluated_subjects)} assignatures"
+                delta=f"{pass_count}/{len(evaluated_subjects)} assignatures",
+                delta_color=delta_color
             )
     
     # Display general comment
