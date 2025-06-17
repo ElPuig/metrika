@@ -43,42 +43,101 @@ def test_csv_conversion():
                 data = json.load(f)
             
             print(f"\n📊 Dades convertides:")
-            print(f"   - Nombre d'estudiants: {len(data)}")
             
-            # Display first student details
-            if data:
-                first_student = data[0]
-                print(f"\n👤 Primer estudiant:")
-                print(f"   - ID: {first_student['id']}")
-                print(f"   - Nom: {first_student['nom_cognoms']}")
-                print(f"   - Trimestre: {first_student['trimestre']}")
-                print(f"   - Nombre de matèries: {len(first_student['materias'])}")
+            # Handle both new and old structures
+            if isinstance(data, dict) and 'estudiants' in data:
+                # New structure
+                print(f"   - Grup: {data.get('grup', 'No especificat')}")
+                print(f"   - Trimestre: {data.get('trimestre', 'No especificat')}")
+                print(f"   - Nombre d'estudiants: {len(data['students'])}")
                 
-                print(f"\n📚 Matèries del primer estudiant:")
-                for i, materia in enumerate(first_student['materias'], 1):
-                    print(f"   {i}. {materia['materia']}")
-                    print(f"      Qualificació: {materia['qualificacio']}")
-                    print(f"      Comentari: {materia['comentari']}")
-                    print()
+                # Display first student details
+                if data['estudiants']:
+                    first_student = data['estudiants'][0]
+                    print(f"\n👤 Primer estudiant:")
+                    print(f"   - ID: {first_student['id']}")
+                    print(f"   - Nom: {first_student['nom_cognoms']}")
+                    print(f"   - Nombre de matèries: {len(first_student['materias'])}")
+                    
+                    print(f"\n📚 Matèries del primer estudiant:")
+                    for i, materia in enumerate(first_student['materias'], 1):
+                        print(f"   {i}. {materia['materia']}")
+                        print(f"      Qualificació: {materia['qualificacio']}")
+                        print(f"      Comentari: {materia['comentari']}")
+                        print()
+            else:
+                # Old structure (direct array)
+                print(f"   - Nombre d'estudiants: {len(data)}")
+                
+                # Display first student details
+                if data:
+                    first_student = data[0]
+                    print(f"\n👤 Primer estudiant:")
+                    print(f"   - ID: {first_student['id']}")
+                    print(f"   - Nom: {first_student['nom_cognoms']}")
+                    print(f"   - Nombre de matèries: {len(first_student['materias'])}")
+                    
+                    print(f"\n📚 Matèries del primer estudiant:")
+                    for i, materia in enumerate(first_student['materias'], 1):
+                        print(f"   {i}. {materia['materia']}")
+                        print(f"      Qualificació: {materia['qualificacio']}")
+                        print(f"      Comentari: {materia['comentari']}")
+                        print()
             
             # Validate structure
             print("🔍 Validant estructura del JSON...")
             validation_errors = []
             
-            for i, student in enumerate(data):
-                # Check required fields
-                required_fields = ['id', 'nom_cognoms', 'trimestre', 'materias']
-                for field in required_fields:
-                    if field not in student:
-                        validation_errors.append(f"Estudiant {i}: Falta el camp '{field}'")
+            # Check if it's the new structure (with grup, trimestre, students) or old structure
+            if isinstance(data, dict) and 'estudiants' in data:
+                # New structure
+                print("📋 Estructura nova detectada (grup, trimestre, estudiants)")
                 
-                # Check materias structure
-                if 'materias' in student:
-                    for j, materia in enumerate(student['materias']):
-                        materia_fields = ['materia', 'qualificacio', 'comentari']
-                        for field in materia_fields:
-                            if field not in materia:
-                                validation_errors.append(f"Estudiant {i}, matèria {j}: Falta el camp '{field}'")
+                # Check top-level fields
+                top_level_fields = ['grup', 'trimestre', 'estudiants']
+                for field in top_level_fields:
+                    if field not in data:
+                        validation_errors.append(f"Falta el camp de nivell superior '{field}'")
+                
+                # Check students array
+                if 'estudiants' in data and isinstance(data['estudiants'], list):
+                    students = data['estudiants']
+                    print(f"   - Nombre d'estudiants: {len(students)}")
+                    
+                    for i, student in enumerate(students):
+                        # Check required fields for each student
+                        required_fields = ['id', 'nom_cognoms']
+                        for field in required_fields:
+                            if field not in student:
+                                validation_errors.append(f"Estudiant {i}: Falta el camp '{field}'")
+                        
+                        # Check materias structure
+                        if 'materias' in student:
+                            for j, materia in enumerate(student['materias']):
+                                materia_fields = ['materia', 'qualificacio', 'comentari']
+                                for field in materia_fields:
+                                    if field not in materia:
+                                        validation_errors.append(f"Estudiant {i}, matèria {j}: Falta el camp '{field}'")
+                else:
+                    validation_errors.append("El camp 'estudiants' no és una llista vàlida")
+            else:
+                # Old structure (direct array of students)
+                print("📋 Estructura antiga detectada (array directa d'estudiants)")
+                
+                for i, student in enumerate(data):
+                    # Check required fields
+                    required_fields = ['id', 'nom_cognoms']
+                    for field in required_fields:
+                        if field not in student:
+                            validation_errors.append(f"Estudiant {i}: Falta el camp '{field}'")
+                    
+                    # Check materias structure
+                    if 'materias' in student:
+                        for j, materia in enumerate(student['materias']):
+                            materia_fields = ['materia', 'qualificacio', 'comentari']
+                            for field in materia_fields:
+                                if field not in materia:
+                                    validation_errors.append(f"Estudiant {i}, matèria {j}: Falta el camp '{field}'")
             
             if validation_errors:
                 print("❌ Errors de validació trobats:")

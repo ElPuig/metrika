@@ -4,6 +4,7 @@ import logging
 from utils.csv_to_json import process_csv_to_json
 import tempfile
 from datetime import datetime
+import json
 
 # Configure logging to write to file in docs/ directory
 log_dir = os.path.join(os.getcwd(), 'docs')
@@ -28,6 +29,12 @@ logger = logging.getLogger(__name__)
 def main():
     logger.info("Iniciant el conversor CSV")
     st.title("Conversor CSV a JSON")
+    
+    # Initialize session state for processed files
+    if 'processed_files' not in st.session_state:
+        st.session_state.processed_files = []
+    if 'show_downloads' not in st.session_state:
+        st.session_state.show_downloads = False
     
     # Create two columns for the layout
     col1, col2 = st.columns(2)
@@ -114,22 +121,17 @@ def main():
                         logger.info(f"Conversió completada amb èxit. Processats {len(processed_files)} fitxers")
                         st.success("Conversió completada amb èxit!")
                         
+                        # Store processed files in session state
+                        st.session_state.processed_files = processed_files
+                        st.session_state.show_downloads = True
+                        
                         # Show the list of converted files
                         st.subheader("Fitxers convertits:")
                         for csv_file in csv_files:
                             json_file = os.path.splitext(csv_file)[0] + ".json"
                             st.write(f"✅ {csv_file} → {json_file}")
                         
-                        # Create download buttons for processed files
-                        if processed_files:
-                            st.subheader("Descarregar fitxers JSON:")
-                            for trimestre, json_data in processed_files:
-                                st.download_button(
-                                    label=f"Descarregar {trimestre}.json",
-                                    data=json_data,
-                                    file_name=f"{trimestre}.json",
-                                    mime="application/json"
-                                )
+                        st.rerun()  # Rerun to show download section
                     else:
                         logger.warning("No s'han pogut processar cap fitxer")
                         st.error("No s'han pogut processar cap fitxer")
@@ -233,25 +235,92 @@ def main():
                         logger.info(f"Conversió de pujada completada amb èxit. Processats {len(processed_files)} fitxers")
                         st.success("Conversió completada amb èxit!")
                         
+                        # Store processed files in session state
+                        st.session_state.processed_files = processed_files
+                        st.session_state.show_downloads = True
+                        
                         # Show the list of converted files
                         st.subheader("Fitxers convertits:")
                         for uploaded_file in uploaded_files:
                             json_file = os.path.splitext(uploaded_file.name)[0] + ".json"
                             st.write(f"✅ {uploaded_file.name} → {json_file}")
                         
-                        # Create download buttons for processed files
-                        if processed_files:
-                            st.subheader("Descarregar fitxers JSON:")
-                            for trimestre, json_data in processed_files:
-                                st.download_button(
-                                    label=f"Descarregar {trimestre}.json",
-                                    data=json_data,
-                                    file_name=f"{trimestre}.json",
-                                    mime="application/json"
-                                )
+                        st.rerun()  # Rerun to show download section
                     else:
                         logger.warning("No s'han pogut processar cap fitxer pujat")
                         st.error("No s'han pogut processar cap fitxer pujat")
+    
+    # Show download section if there are processed files
+    if st.session_state.show_downloads and st.session_state.processed_files:
+        st.markdown("---")
+        st.subheader("📥 Descarregar fitxers JSON")
+        
+        # Create download buttons in a container to prevent re-renders
+        download_container = st.container()
+        with download_container:
+            for trimestre, json_data in st.session_state.processed_files:
+                st.markdown(f"### 📄 {trimestre}.json")
+                
+                # Create two columns for inputs
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    grup_name = st.text_input(
+                        f"Nom del grup per {trimestre}",
+                        value="",
+                        key=f"grup_{trimestre}",
+                        placeholder="Ex: 3B, 4A, etc."
+                    )
+                
+                with col2:
+                    trimestre_name = st.text_input(
+                        f"Nom del trimestre per {trimestre}",
+                        value=trimestre,
+                        key=f"trimestre_name_{trimestre}",
+                        placeholder="Ex: Primer trimestre, T1, etc."
+                    )
+                
+                # Create the final JSON structure
+                if grup_name and trimestre_name:
+                    # Parse the original JSON data to get students array
+                    students_data = json.loads(json_data)
+                    
+                    # Create new structure
+                    final_json_structure = {
+                        "grup": grup_name,
+                        "trimestre": trimestre_name,
+                        "estudiants": students_data
+                    }
+                    
+                    # Convert back to JSON string
+                    final_json_data = json.dumps(final_json_structure, ensure_ascii=False, indent=2)
+                    
+                    st.download_button(
+                        label=f"📥 Descarregar {trimestre}.json",
+                        data=final_json_data,
+                        file_name=f"{trimestre}.json",
+                        mime="application/json",
+                        key=f"download_{trimestre}",
+                        disabled=False
+                    )
+                else:
+                    st.warning("⚠️ Si us plau, omple el nom del grup i del trimestre abans de descarregar.")
+                    st.download_button(
+                        label=f"📥 Descarregar {trimestre}.json",
+                        data=json_data,  # Original data as fallback
+                        file_name=f"{trimestre}.json",
+                        mime="application/json",
+                        key=f"download_{trimestre}",
+                        disabled=True
+                    )
+                
+                st.markdown("---")
+        
+        # Add a button to clear downloads
+        if st.button("🗑️ Netejar descàrregues", key="clear_downloads"):
+            st.session_state.processed_files = []
+            st.session_state.show_downloads = False
+            st.rerun()
 
 if __name__ == "__main__":
     main() 

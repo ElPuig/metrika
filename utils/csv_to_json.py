@@ -137,8 +137,7 @@ def process_csv_to_json(csv_file, output_file, trimestre):
                 
                 student = {
                     'id': str(row['id']).strip(),
-                    'nom_cognoms': str(row['nom_cognoms']).strip(),
-                    'trimestre': str(row['numero_avaluacio']).strip()
+                    'nom_cognoms': str(row['nom_cognoms']).strip()
                 }
                 
                 # Process materias array
