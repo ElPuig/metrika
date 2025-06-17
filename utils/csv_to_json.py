@@ -65,7 +65,7 @@ def clean_csv_line_breaks(csv_file_path):
                         cleaned_row.append(cell)
                 writer.writerow(cleaned_row)
         
-        logger.info(f"S'ha netejat amb èxit el fitxer CSV utilitzant el separador '{best_separator}'. Processades {len(best_rows)} files")
+        logger.info(f"S'ha netejat amb èxit el fitxer CSV utilizando el separador '{best_separator}'. Processades {len(best_rows)} files")
         return temp_file_path
         
     except Exception as e:
@@ -73,7 +73,18 @@ def clean_csv_line_breaks(csv_file_path):
         # If cleaning fails, return the original file path
         return csv_file_path
 
-def process_csv_to_json(csv_file, output_file, trimestre):
+def save_json_to_file(json_data, output_file):
+    """Save JSON data to a file"""
+    try:
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(json_data)
+        logger.info(f"S'ha desat el fitxer JSON: {output_file}")
+        return True
+    except Exception as e:
+        logger.error(f"Error desant el fitxer JSON {output_file}: {str(e)}")
+        return False
+
+def process_csv_to_json(csv_file, output_file, trimestre, save_to_file=False):
     """Process a single CSV file and convert it to JSON format"""
     logger.info(f"Iniciant el processament de {csv_file}")
     
@@ -211,10 +222,10 @@ def process_csv_to_json(csv_file, output_file, trimestre):
             logger.error(f"S'ha generat JSON buit per a {csv_file}")
             return False, f"S'ha generat JSON buit per a {csv_file}", None
         
-        # Save to file
-        logger.debug(f"Desant al fitxer {output_file}")
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(json_data)
+        # Save to file only if requested
+        if save_to_file:
+            logger.debug(f"Desant al fitxer {output_file}")
+            save_json_to_file(json_data, output_file)
         
         logger.info(f"S'ha processat amb èxit {csv_file}")
             
@@ -232,12 +243,13 @@ def process_csv_to_json(csv_file, output_file, trimestre):
             except Exception as e:
                 logger.warning(f"No s'ha pogut eliminar el fitxer temporal {cleaned_csv_file}: {str(e)}")
 
-def process_trimestre_files(csv_files, output_dir):
+def process_trimestre_files(csv_files, output_dir, save_to_file=False):
     """Process multiple CSV files for different trimesters"""
     results = []
     
     # Ensure output directory exists
-    os.makedirs(output_dir, exist_ok=True)
+    if save_to_file:
+        os.makedirs(output_dir, exist_ok=True)
     
     # Process each CSV file
     for csv_file in csv_files:
@@ -266,10 +278,10 @@ def process_trimestre_files(csv_files, output_dir):
         output_file = os.path.join(output_dir, f"{trimester}.json")
         
         # Process the file
-        success, message, json_data = process_csv_to_json(csv_file, output_file, trimester)
+        success, message, json_data = process_csv_to_json(csv_file, output_file, trimester, save_to_file=save_to_file)
         
-        # If processing failed, remove any empty JSON file that might have been created
-        if not success:
+        # If processing failed and we're saving to file, remove any empty JSON file that might have been created
+        if not success and save_to_file:
             if os.path.exists(output_file):
                 try:
                     # Check if the file is empty or contains only empty array
@@ -332,7 +344,7 @@ def main():
         
         # Process files
         full_paths = [os.path.join(working_dir, f) for f in selected_files]
-        results = process_trimestre_files(full_paths, working_dir)
+        results = process_trimestre_files(full_paths, working_dir, save_to_file=True)
         
         # Display results
         st.subheader("Resultats de la conversió:")

@@ -82,6 +82,8 @@ def load_json_files(directory, selected_files, trimestre=None):
                     
                     # Filter out students with NULL IDs and add trimester info
                     for student in students:
+                        # Ensure ID is always a string
+                        student['id'] = str(student['id'])
                         if student['id'].upper() != "NULL" and student['id']:
                             student['trimestre'] = trimestre_name
                             student['grup'] = grup
@@ -106,6 +108,8 @@ def load_json_files(directory, selected_files, trimestre=None):
                     
                     # Filter out students with NULL IDs and add trimester info
                     for student in data:
+                        # Ensure ID is always a string
+                        student['id'] = str(student['id'])
                         if student['id'].upper() != "NULL" and student['id']:
                             student['trimestre'] = trimestre_from_filename
                             student['grup'] = 'Grup Antic'

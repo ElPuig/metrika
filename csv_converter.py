@@ -88,7 +88,7 @@ def main():
                         logger.debug(f"Entrada: {input_csv}, Sortida: {output_json}")
                         
                         try:
-                            # Convert CSV to JSON
+                            # Convert CSV to JSON (store in memory, don't save to file)
                             success, message, json_data = process_csv_to_json(input_csv, output_json, trimestre)
                             if success:
                                 logger.info(f"S'ha processat amb èxit {csv_file}")
@@ -202,8 +202,8 @@ def main():
                         logger.debug(f"Entrada: {input_csv}, Sortida: {output_json}")
                         
                         try:
-                            # Convert CSV to JSON
-                            success, message, json_data = process_csv_to_json(input_csv, output_json, trimestre)
+                            # Convert CSV to JSON (store in memory, don't save to file)
+                            success, message, json_data = process_csv_to_json(input_csv, output_json, trimestre, save_to_file=False)
                             if success:
                                 logger.info(f"S'ha processat amb èxit {uploaded_file.name}")
                                 processed_files.append((trimestre, json_data))
