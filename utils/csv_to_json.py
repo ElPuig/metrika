@@ -1,49 +1,97 @@
 import csv
 import json
 import os
+import logging
 from typing import Dict, List, Set
 import pandas as pd
 import streamlit as st
 
+# Configure logging
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 def process_csv_to_json(csv_file, output_file, trimestre):
     """Process a single CSV file and convert it to JSON format"""
+    logger.info(f"Starting to process {csv_file}")
     try:
-        # Read CSV file
-        df = pd.read_csv(csv_file, encoding='utf-8')
+        # Try to detect the correct separator
+        separators = [',', ';', '|', '\t']
+        df = None
+        
+        logger.debug(f"Trying different separators for {csv_file}")
+        for sep in separators:
+            try:
+                logger.debug(f"Trying separator '{sep}'")
+                df = pd.read_csv(csv_file, encoding='utf-8', sep=sep, on_bad_lines='skip')
+                # If we can read at least one row, assume this separator is correct
+                if len(df) > 0:
+                    logger.info(f"Successfully read {len(df)} rows with separator '{sep}'")
+                    break
+                else:
+                    logger.debug(f"Separator '{sep}' worked but no data found")
+            except Exception as e:
+                logger.debug(f"Separator '{sep}' failed: {str(e)}")
+                continue
+        
+        # If no separator worked, try without specifying separator
+        if df is None or len(df) == 0:
+            logger.debug("No separator worked, trying default pandas separator")
+            try:
+                df = pd.read_csv(csv_file, encoding='utf-8', on_bad_lines='skip')
+                logger.info(f"Default separator read {len(df)} rows")
+            except Exception as e:
+                logger.error(f"Default separator also failed: {str(e)}")
+                return False, f"Error reading CSV file {csv_file}: {str(e)}", None
+        
+        if df is None or len(df) == 0:
+            logger.warning(f"No valid data found in {csv_file}")
+            return False, f"No valid data found in {csv_file}", None
+        
+        logger.info(f"DataFrame columns: {list(df.columns)}")
+        logger.info(f"DataFrame shape: {df.shape}")
         
         # Convert DataFrame to list of dictionaries
         students = []
-        for _, row in df.iterrows():
-            student = {
-                'id': str(row['id']),
-                'name': row['name'],
-                'trimestre': trimestre
-            }
-            
-            # Add all other columns as fields
-            for col in df.columns:
-                if col not in ['id', 'name']:
-                    student[col] = row[col]
-            
-            students.append(student)
+        logger.debug("Converting DataFrame to list of dictionaries")
+        for i, (idx, row) in enumerate(df.iterrows()):
+            try:
+                student = {
+                    'id': str(row['id']),
+                    'name': row['name'],
+                    'trimestre': trimestre
+                }
+                
+                # Add all other columns as fields
+                for col in df.columns:
+                    if col not in ['id', 'name']:
+                        student[col] = row[col]
+                
+                students.append(student)
+                if i < 3:  # Show first 3 students for debugging
+                    logger.debug(f"Student {i}: {student}")
+            except Exception as e:
+                logger.error(f"Error processing row {idx}: {str(e)}")
+                logger.debug(f"Row data: {row.to_dict()}")
+                continue
+        
+        logger.info(f"Successfully converted {len(students)} students")
         
         # Convert to JSON string
+        logger.debug("Converting to JSON string")
         json_data = json.dumps(students, ensure_ascii=False, indent=2)
         
-        # Create a download button for the JSON file
-        st.download_button(
-            label=f"Descarregar {trimestre}.json",
-            data=json_data,
-            file_name=f"{trimestre}.json",
-            mime="application/json"
-        )
+        # Save to file
+        logger.debug(f"Saving to file {output_file}")
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(json_data)
         
-        print(f"Successfully processed {csv_file}")
+        logger.info(f"Successfully processed {csv_file}")
             
-        return True, f"Successfully processed {csv_file}"
+        return True, f"Successfully processed {csv_file}", json_data
         
     except Exception as e:
-        return False, f"Error processing {csv_file}: {str(e)}"
+        logger.error(f"Exception in process_csv_to_json: {str(e)}")
+        return False, f"Error processing {csv_file}: {str(e)}", None
 
 def process_trimestre_files(csv_files, output_dir):
     """Process multiple CSV files for different trimesters"""
@@ -79,13 +127,12 @@ def process_trimestre_files(csv_files, output_dir):
         output_file = os.path.join(output_dir, f"{trimester}.json")
         
         # Process the file
-        success, message = process_csv_to_json(csv_file, output_file, trimester)
+        success, message, json_data = process_csv_to_json(csv_file, output_file, trimester)
         results.append((success, message))
     
     return results
 
 def main():
-    st.set_page_config(layout="wide")
     st.title("Conversor de CSV a JSON")
     
     # Get current directory
