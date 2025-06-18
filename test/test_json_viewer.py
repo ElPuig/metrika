@@ -33,7 +33,7 @@ def test_app():
     try:
         # Load JSON files
         print("🔄 Carregant fitxers JSON...")
-        students, file_info = load_json_files(test_dir, json_files)
+        students, file_info, _ = load_json_files(test_dir, json_files)
         
         print(f"✅ S'han carregat {len(students)} estudiants")
         print(f"📋 Informació dels fitxers:")
