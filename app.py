@@ -39,7 +39,7 @@ def compare_versions(version1, version2):
         return 0
 
 def get_json_files(directory):
-    """Get all JSON files in the directory"""
+    """Get all JSON files in the directory (kept for compatibility with other modules)"""
     json_files = []
     for filename in os.listdir(directory):
         if filename.endswith('.json'):
@@ -47,7 +47,7 @@ def get_json_files(directory):
     return sorted(json_files)
 
 def load_json_files(directory, selected_files, trimestre=None):
-    """Load selected JSON files, optionally filtered by trimester"""
+    """Load selected JSON files, optionally filtered by trimester (kept for compatibility with other modules)"""
     all_students = []
     file_info = {}  # Store file metadata for display
     version_warnings = []  # Store version compatibility warnings
@@ -125,6 +125,87 @@ def load_json_files(directory, selected_files, trimestre=None):
     
     return all_students, file_info, version_warnings
 
+def load_uploaded_json_files(uploaded_files, trimestre=None):
+    """Load uploaded JSON files, optionally filtered by trimester"""
+    all_students = []
+    file_info = {}  # Store file metadata for display
+    version_warnings = []  # Store version compatibility warnings
+    
+    for uploaded_file in uploaded_files:
+        try:
+            # Read the uploaded file content and decode it
+            uploaded_file.seek(0)  # Reset file pointer to beginning
+            file_content = uploaded_file.read()
+            data = json.loads(file_content.decode('utf-8'))
+            
+            # Check if it's the new structure (with grup, trimestre, estudiants)
+            if isinstance(data, dict) and 'estudiants' in data:
+                # New structure
+                students = data['estudiants']
+                grup = data.get('grup', 'Grup desconegut')
+                trimestre_name = data.get('trimestre', 'Trimestre desconegut')
+                file_version = data.get('metrika_version', '0.0.0')
+                
+                # Check version compatibility
+                if compare_versions(file_version, AppConfig.MIN_COMPATIBLE_VERSION) < 0:
+                    version_warnings.append(f"⚠️ {uploaded_file.name}: Versió {file_version} és anterior a la versió mínima compatible ({AppConfig.MIN_COMPATIBLE_VERSION})")
+                elif compare_versions(file_version, AppConfig.VERSION) > 0:
+                    version_warnings.append(f"⚠️ {uploaded_file.name}: Versió {file_version} és posterior a la versió actual ({AppConfig.VERSION})")
+                
+                # Create display name: grup_trimestre
+                display_name = f"{grup}_{trimestre_name}"
+                file_info[uploaded_file.name] = {
+                    'display_name': display_name,
+                    'grup': grup,
+                    'trimestre': trimestre_name,
+                    'version': file_version
+                }
+                
+                # Filter out students with NULL IDs and add trimester info
+                for student in students:
+                    # Ensure ID is always a string
+                    student['id'] = str(student['id'])
+                    if student['id'].upper() != "NULL" and student['id']:
+                        student['trimestre'] = trimestre_name
+                        student['grup'] = grup
+                        student['file_display_name'] = display_name
+                        all_students.append(student)
+                        
+            elif isinstance(data, list):
+                # Old structure (direct array of students)
+                # Try to extract trimester from filename
+                trimestre_from_filename = uploaded_file.name.split('.')[0]  # Will be T1, T2, or T3
+                
+                display_name = f"Grup_Antic_{trimestre_from_filename}"
+                file_info[uploaded_file.name] = {
+                    'display_name': display_name,
+                    'grup': 'Grup Antic',
+                    'trimestre': trimestre_from_filename,
+                    'version': '0.0.0'  # Old files don't have version
+                }
+                
+                # Add warning for old format
+                version_warnings.append(f"⚠️ {uploaded_file.name}: Format antic sense informació de versió")
+                
+                # Filter out students with NULL IDs and add trimester info
+                for student in data:
+                    # Ensure ID is always a string
+                    student['id'] = str(student['id'])
+                    if student['id'].upper() != "NULL" and student['id']:
+                        student['trimestre'] = trimestre_from_filename
+                        student['grup'] = 'Grup Antic'
+                        student['file_display_name'] = display_name
+                        all_students.append(student)
+            else:
+                st.warning(f"Format de fitxer no reconegut per a {uploaded_file.name}")
+                continue
+                
+        except Exception as e:
+            st.error(f"Error carregant el fitxer {uploaded_file.name}: {str(e)}")
+            continue
+    
+    return all_students, file_info, version_warnings
+
 def main():
     st.set_page_config(
         page_title=f"{AppConfig.APP_NAME} - Sistema de Visualització de Notes",
@@ -157,39 +238,20 @@ def main():
     if menu == "Estadísticas":
         st.title("Sistema de Visualització de Notes")
         
-        # Get current directory
-        current_dir = os.getcwd()
-        
-        # Create a text input for the directory path
-        working_dir = st.text_input(
-            "Selecciona el directori que conté els fitxers JSON (T1.json, T2.json, T3.json)",
-            value=current_dir
+        # Create a drag and drop file uploader for JSON files
+        uploaded_files = st.file_uploader(
+            "Arrossega els fitxers JSON aquí (T1.json, T2.json, T3.json)",
+            type=['json'],
+            accept_multiple_files=True,
+            help="Selecciona els fitxers JSON que vols visualitzar"
         )
         
-        if not os.path.exists(working_dir):
-            st.error("El directori no existeix")
+        if not uploaded_files:
+            st.warning("Arrossega almenys un fitxer JSON per visualitzar")
             return
         
-        # Get all JSON files in the selected directory
-        json_files = get_json_files(working_dir)
-        
-        if not json_files:
-            st.error(f"No s'han trobat fitxers JSON al directori '{working_dir}'")
-            return
-        
-        # Create a multiselect for JSON files
-        selected_files = st.multiselect(
-            "Selecciona els fitxers JSON a visualitzar",
-            json_files,
-            default=json_files  # Select all files by default
-        )
-        
-        if not selected_files:
-            st.warning("Selecciona almenys un fitxer JSON per visualitzar")
-            return
-        
-        # Load all files to get their metadata
-        all_students, file_info, version_warnings = load_json_files(working_dir, selected_files)
+        # Load all uploaded files to get their metadata
+        all_students, file_info, version_warnings = load_uploaded_json_files(uploaded_files)
         
         if not all_students:
             st.error("No s'han pogut carregar estudiants dels fitxers seleccionats")
@@ -204,21 +266,21 @@ def main():
         
         # Display selected files with their display names
         st.subheader("Fitxers seleccionats:")
-        for file in selected_files:
-            if file in file_info:
-                display_name = file_info[file]['display_name']
-                grup = file_info[file]['grup']
-                trimestre = file_info[file]['trimestre']
-                version = file_info[file]['version']
-                st.write(f"📄 {file} → {display_name} (Grup: {grup}, Trimestre: {trimestre}, Versió: {version})")
+        for uploaded_file in uploaded_files:
+            if uploaded_file.name in file_info:
+                display_name = file_info[uploaded_file.name]['display_name']
+                grup = file_info[uploaded_file.name]['grup']
+                trimestre = file_info[uploaded_file.name]['trimestre']
+                version = file_info[uploaded_file.name]['version']
+                st.write(f"📄 {uploaded_file.name} → {display_name} (Grup: {grup}, Trimestre: {trimestre}, Versió: {version})")
             else:
-                st.write(f"📄 {file}")
+                st.write(f"📄 {uploaded_file.name}")
         
         # Create trimester selector based on available trimesters
         available_trimesters = []
-        for file in selected_files:
-            if file in file_info:
-                available_trimesters.append(file)
+        for uploaded_file in uploaded_files:
+            if uploaded_file.name in file_info:
+                available_trimesters.append(uploaded_file.name)
         
         if not available_trimesters:
             st.error("No s'han trobat fitxers vàlids per seleccionar")
@@ -234,7 +296,8 @@ def main():
         )
         
         # Cargar estudiantes según el trimestre seleccionado
-        students, _, _ = load_json_files(working_dir, [trimestre])
+        selected_file = next(f for f in uploaded_files if f.name == trimestre)
+        students, _, _ = load_uploaded_json_files([selected_file])
         
         # Create tabs for different views
         tab1, tab2, tab3, tab4 = st.tabs(["Grup", "Materia", "Alumne", "Evolució"])
@@ -264,7 +327,7 @@ def main():
             
         with tab4:
             # Load all trimesters for evolution comparison
-            all_trimesters, _, _ = load_json_files(working_dir, selected_files)
+            all_trimesters, _, _ = load_uploaded_json_files(uploaded_files)
             if len(all_trimesters) < 2:
                 st.warning("Es necessiten almenys dos trimestres per visualitzar l'evolució")
             else:

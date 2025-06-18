@@ -284,6 +284,10 @@ def display_group_statistics(students):
 
 
 def group_failure_table(students):
+    if not students:
+        st.info("No hi ha estudiants per mostrar en aquesta taula.")
+        return
+        
     categories = {
         "Tot aprovat": [],
         "Fins a 3 susp.": [],
@@ -304,10 +308,11 @@ def group_failure_table(students):
     total = len(students)
     data = []
     for cat, names in categories.items():
+        percentage = f"{(len(names)/total*100):.1f}%" if total > 0 else "0.0%"
         data.append({
             "Categoria": cat,
             "Nº d'alumnes": len(names),
-            "%": f"{(len(names)/total*100):.1f}%",
+            "%": percentage,
             "Alumnes": '; '.join(names)
         })
     st.subheader("Resum de suspensos per alumne")
