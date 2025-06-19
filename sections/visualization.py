@@ -4,6 +4,7 @@ import numpy as np
 from utils.constants import DataConfig, MarkConfig
 import plotly.express as px
 import plotly.graph_objects as go
+import time
 
 
 def show_classroom_table(data:pd.DataFrame, title:str=None):
@@ -280,7 +281,7 @@ def display_group_statistics(students):
 
     st.subheader("Distribució de qualificacions per trimestre")
     # Display the chart in Streamlit
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key=f"group_statistics_{time.time()}")
 
 
 def group_failure_table(students):
