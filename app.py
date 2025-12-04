@@ -13,6 +13,7 @@ from sections.visualization import (
     display_subject_statistics
 )
 from sections.evolution import display_evolution_dashboard
+from sections.acta_viewer import display_acta_viewer
 from utils.constants import MarkConfig, AppConfig
 import plotly.graph_objects as go
 import pandas as pd
@@ -232,7 +233,7 @@ def main():
     # Sidebar menu
     menu = st.sidebar.selectbox(
         "Menú",
-        ["Estadísticas", "Convertir CSV"]
+        ["Estadísticas", "Actes CSV", "Convertir CSV"]
     )
     
     if menu == "Estadísticas":
@@ -332,6 +333,9 @@ def main():
                 st.warning("Es necessiten almenys dos trimestres per visualitzar l'evolució")
             else:
                 display_evolution_dashboard(all_trimesters)
+    
+    elif menu == "Actes CSV":
+        display_acta_viewer()
     
     elif menu == "Convertir CSV":
         st.title("Convertir CSV")

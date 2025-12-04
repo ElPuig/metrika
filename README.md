@@ -4,21 +4,32 @@ Una aplicació web basada en Streamlit per analitzar i visualitzar dades del ren
 
 ## Com funciona
 
-Metrika funciona en dos passos principals:
+Metrika ofereix tres modes principals de treball:
 
-1. **Convertir CSV a JSON**
-   - Primer, has d'anar a la secció "Convertir CSV" del menú lateral
-   - Aquí podràs convertir el fitxer CSV extret de les actes d'Esfera a format JSON
-   - Aquests fitxers JSON són els que Metrika utilitza per mostrar les estadístiques
+1. **Actes CSV** (Visualització directa)
+   - Carrega directament fitxers d'actes CSV exportats d'Esfera
+   - Visualitza estadístiques globals, per matèria i per alumne
+   - Suporta qualificacions en format "Assolit-X", "No assolit", "Convalidat" i "Pendent"
+   - Analitza fins a 100 matèries per alumne (m1-m100, q1-q100, c1-c100)
 
-2. **Visualitzar Estadístiques**
-   - Un cop tinguis els fitxers JSON, ves a la secció "Estadístiques"
+2. **Convertir CSV a JSON**
+   - Converteix fitxers CSV extrets de les actes d'Esfera a format JSON
+   - Els fitxers JSON es poden utilitzar per a anàlisis més complexes
+   - Manté l'històric per a comparacions entre trimestres
+
+3. **Visualitzar Estadístiques**
+   - Treballa amb fitxers JSON generats prèviament
    - Introdueix el path a la carpeta que conté els fitxers JSON (T1.json, T2.json, T3.json)
-   - Podràs veure totes les estadístiques i visualitzacions disponibles
+   - Visualitza evolució temporal i comparatives entre trimestres
 
 ## Característiques
 
 ### Implementades
+- Visualització directa d'actes CSV exportades d'Esfera
+- Suport per a qualificacions en format "Assolit-X", "No assolit", "Convalidat", "Pendent"
+- Vista global amb estadístiques generals i distribució de qualificacions
+- Vista per matèria amb estadístiques específiques i llista d'alumnes
+- Vista per alumne amb resum complet de qualificacions i comentaris
 - Visualització interactiva del rendiment dels estudiants
 - Anàlisi i estadístiques per matèria
 - Seguiment individual del rendiment dels estudiants
@@ -42,11 +53,13 @@ Metrika funciona en dos passos principals:
 ├── app.py         # Aplicació principal
 ├── requirements.txt       # Dependències del projecte
 ├── sections/            # Seccions principals de l'aplicació
+│   ├── acta_viewer.py   # Visualització d'actes CSV
 │   ├── evolution.py     # Visualitzacions d'evolució de notes
 │   ├── student_marks.py # Visualització de notes per alumne
 │   ├── student_selector.py # Selector d'alumnes
 │   └── visualization.py # Visualitzacions generals i estadístiques
 ├── utils/               # Funcions i ajudants d'utilitat
+│   ├── acta_loader.py   # Càrrega i processament d'actes CSV
 │   ├── constants.py     # Constants i configuracions
 │   ├── csv_to_json.py   # Conversió de CSV a JSON
 │   ├── data_loader.py   # Càrrega de dades
@@ -84,6 +97,18 @@ streamlit run app.py
 2. Accedeix a l'aplicació a través del teu navegador web a `http://localhost:8501`
 
 ## Característiques Principals
+
+### Visualització d'Actes CSV
+- Càrrega directa de fitxers CSV d'actes exportats d'Esfera
+- Suport per a format pipe-delimited amb fins a 100 matèries per alumne
+- Processament automàtic de qualificacions:
+  - **Assolit-X**: Qualificacions numèriques (0-10)
+  - **No assolit**: Competència no assolida
+  - **Convalidat**: Matèria convalidada
+  - **Pendent**: Qualificació pendent
+- **Vista Global**: Estadístiques generals, distribució de qualificacions, histograma de notes, rànquing d'alumnes
+- **Vista per Matèria**: Estadístiques específiques, distribució, llista d'alumnes amb notes i comentaris
+- **Vista per Alumne**: Resum complet, taxa d'èxit, mitjana, distribució i comentari general
 
 ### Visualització de Dades
 - Taules de rendiment de l'aula
