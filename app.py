@@ -15,6 +15,7 @@ from sections.visualization import (
 from sections.evolution import display_evolution_dashboard
 from sections.acta_viewer import display_acta_viewer
 from utils.constants import MarkConfig, AppConfig
+from utils.acta_csv_loader import parse_uploaded_acta_csv, get_acta_csv_info
 import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
@@ -207,6 +208,50 @@ def load_uploaded_json_files(uploaded_files, trimestre=None):
     
     return all_students, file_info, version_warnings
 
+def load_uploaded_csv_acta_files(uploaded_files):
+    """Load uploaded CSV acta files"""
+    all_students = []
+    file_info = {}
+    version_warnings = []
+    
+    for uploaded_file in uploaded_files:
+        try:
+            # Parse the CSV file
+            students = parse_uploaded_acta_csv(uploaded_file)
+            
+            if not students:
+                st.warning(f"No s'han trobat estudiants en el fitxer {uploaded_file.name}")
+                continue
+            
+            # Get metadata from first student (all have same group info)
+            grup = students[0].get('grup_codi', 'Unknown')
+            trimestre_name = f"T{students[0].get('numero_avaluacio', 'X')}"
+            nom_ensenyament = students[0].get('nom_ensenyament', 'Unknown')
+            
+            display_name = f"{grup}_{trimestre_name}"
+            file_info[uploaded_file.name] = {
+                'display_name': display_name,
+                'grup': grup,
+                'trimestre': trimestre_name,
+                'version': 'CSV',
+                'nom_ensenyament': nom_ensenyament
+            }
+            
+            # Add file info to each student
+            for student in students:
+                student['trimestre'] = trimestre_name
+                student['grup'] = grup
+                student['file_display_name'] = display_name
+                all_students.append(student)
+                
+        except Exception as e:
+            st.error(f"Error carregant el fitxer CSV {uploaded_file.name}: {str(e)}")
+            import traceback
+            st.error(traceback.format_exc())
+            continue
+    
+    return all_students, file_info, version_warnings
+
 def main():
     st.set_page_config(
         page_title=f"{AppConfig.APP_NAME} - Sistema de Visualització de Notes",
@@ -233,26 +278,51 @@ def main():
     # Sidebar menu
     menu = st.sidebar.selectbox(
         "Menú",
-        ["Estadísticas", "Actes CSV", "Convertir CSV"]
+        ["Estadísticas", "Actes CSV (CF)", "Convertir CSV"]
     )
     
     if menu == "Estadísticas":
         st.title("Sistema de Visualització de Notes")
         
-        # Create a drag and drop file uploader for JSON files
-        uploaded_files = st.file_uploader(
-            "Arrossega els fitxers JSON aquí (T1.json, T2.json, T3.json)",
-            type=['json'],
-            accept_multiple_files=True,
-            help="Selecciona els fitxers JSON que vols visualitzar"
+        # File type selector
+        file_type = st.radio(
+            "Tipus de fitxer",
+            ["JSON", "CSV (Actes)"],
+            horizontal=True,
+            help="Selecciona el tipus de fitxer que vols carregar"
         )
         
-        if not uploaded_files:
-            st.warning("Arrossega almenys un fitxer JSON per visualitzar")
-            return
-        
-        # Load all uploaded files to get their metadata
-        all_students, file_info, version_warnings = load_uploaded_json_files(uploaded_files)
+        if file_type == "JSON":
+            # Create a drag and drop file uploader for JSON files
+            uploaded_files = st.file_uploader(
+                "Arrossega els fitxers JSON aquí (T1.json, T2.json, T3.json)",
+                type=['json'],
+                accept_multiple_files=True,
+                help="Selecciona els fitxers JSON que vols visualitzar"
+            )
+            
+            if not uploaded_files:
+                st.warning("Arrossega almenys un fitxer JSON per visualitzar")
+                return
+            
+            # Load all uploaded files to get their metadata
+            all_students, file_info, version_warnings = load_uploaded_json_files(uploaded_files)
+            
+        else:  # CSV
+            # Create a drag and drop file uploader for CSV files
+            uploaded_files = st.file_uploader(
+                "Arrossega els fitxers CSV d'actes aquí",
+                type=['csv'],
+                accept_multiple_files=True,
+                help="Selecciona els fitxers CSV d'actes que vols visualitzar"
+            )
+            
+            if not uploaded_files:
+                st.warning("Arrossega almenys un fitxer CSV per visualitzar")
+                return
+            
+            # Load all uploaded CSV files
+            all_students, file_info, version_warnings = load_uploaded_csv_acta_files(uploaded_files)
         
         if not all_students:
             st.error("No s'han pogut carregar estudiants dels fitxers seleccionats")
@@ -298,7 +368,10 @@ def main():
         
         # Cargar estudiantes según el trimestre seleccionado
         selected_file = next(f for f in uploaded_files if f.name == trimestre)
-        students, _, _ = load_uploaded_json_files([selected_file])
+        if file_type == "JSON":
+            students, _, _ = load_uploaded_json_files([selected_file])
+        else:
+            students, _, _ = load_uploaded_csv_acta_files([selected_file])
         
         # Create tabs for different views
         tab1, tab2, tab3, tab4 = st.tabs(["Grup", "Materia", "Alumne", "Evolució"])
@@ -328,7 +401,11 @@ def main():
             
         with tab4:
             # Load all trimesters for evolution comparison
-            all_trimesters, _, _ = load_uploaded_json_files(uploaded_files)
+            if file_type == "JSON":
+                all_trimesters, _, _ = load_uploaded_json_files(uploaded_files)
+            else:
+                all_trimesters, _, _ = load_uploaded_csv_acta_files(uploaded_files)
+            
             if len(all_trimesters) < 2:
                 st.warning("Es necessiten almenys dos trimestres per visualitzar l'evolució")
             else:

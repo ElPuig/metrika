@@ -1,9 +1,10 @@
 import streamlit as st
+from utils.data_normalizer import normalize_student_data
 
 def display_student_selector(students):
     """Display the student selector dropdown and return the selected student data"""
     # Create a list of student names for the dropdown
-    student_names = [f"{student['nom_cognoms']} ({student['id']})" for student in students]
+    student_names = [f"{student.get('nom_cognoms', student.get('nom', 'Unknown'))} ({student['id']})" for student in students]
     
     # Create the dropdown
     selected_student = st.selectbox(
@@ -16,6 +17,10 @@ def display_student_selector(students):
     student_id = selected_student.split("(")[-1].strip(")")
     selected_student_data = next(student for student in students if str(student['id']) == student_id)
     
+    # Normalize the student data but keep original for display
+    original_data = selected_student_data.copy()
+    normalized_data = normalize_student_data(selected_student_data)
+    
     # Calculate average grade
     mark_to_value = {
         "No assoliment": 2.5,
@@ -26,7 +31,7 @@ def display_student_selector(students):
     
     # Get all evaluated subjects (excluding non-evaluated ones)
     evaluated_subjects = [
-        subject for subject in selected_student_data['materies']
+        subject for subject in normalized_data['materies']
         if subject['qualificacio'] in mark_to_value
     ]
     
@@ -85,8 +90,9 @@ def display_student_selector(students):
                 delta_color=delta_color
             )
     
-    # Display general comment
-    st.subheader("Comentari General")
-    st.write(selected_student_data['comentari_general'])
+    # Display general comment if available
+    if 'comentari_general' in original_data and original_data['comentari_general']:
+        st.subheader("Comentari General")
+        st.write(original_data['comentari_general'])
     
-    return selected_student_data 
+    return original_data 

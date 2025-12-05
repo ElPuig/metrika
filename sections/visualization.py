@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from utils.constants import DataConfig, MarkConfig
+from utils.data_normalizer import normalize_student_data
 import plotly.express as px
 import plotly.graph_objects as go
 import time
@@ -191,6 +192,9 @@ def show_student_evolution(data1:pd.DataFrame, data2:pd.DataFrame, student_name:
 
 def display_marks_pie_chart(student_data):
     """Display a pie chart of the student's marks by qualification level"""
+    # Normalize student data
+    student_data = normalize_student_data(student_data)
+    
     # Initialize counters for each qualification level
     qualification_counts = {
         "": 0,
@@ -244,6 +248,9 @@ def display_marks_pie_chart(student_data):
 
 def display_group_statistics(students):
     """Display statistics for the entire group"""
+    # Normalize all students
+    students = [normalize_student_data(s) for s in students]
+    
     # Initialize counters for each qualification level
     qualification_counts = {
         MarkConfig.NA.value: 0,
@@ -288,6 +295,9 @@ def group_failure_table(students):
     if not students:
         st.info("No hi ha estudiants per mostrar en aquesta taula.")
         return
+    
+    # Normalize all students
+    students = [normalize_student_data(s) for s in students]
         
     categories = {
         "Tot aprovat": [],
@@ -342,23 +352,33 @@ def group_failure_table(students):
 
 def display_subjects_bar_chart(students):
     st.subheader("Distribució de qualificacions per assignatura")
+    
+    # Normalize all students
+    students = [normalize_student_data(s) for s in students]
 
-    # Add course level checkboxes
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        first_year = st.checkbox("1r", value=False, key="bar_1r")
-    with col2:
-        second_year = st.checkbox("2n", value=False, key="bar_2n")
-    with col3:
-        third_year = st.checkbox("3r", value=True, key="bar_3r")
+    # Add course level checkboxes (only for JSON, CSV already filters to 4t)
+    # Check if we have CSV data (students have 'subjects' originally)
+    is_csv = any('numero_avaluacio' in s for s in students)
+    
+    if not is_csv:
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            first_year = st.checkbox("1r", value=False, key="bar_1r")
+        with col2:
+            second_year = st.checkbox("2n", value=False, key="bar_2n")
+        with col3:
+            third_year = st.checkbox("3r", value=True, key="bar_3r")
 
-    selected_courses = []
-    if first_year:
-        selected_courses.append("1r")
-    if second_year:
-        selected_courses.append("2n")
-    if third_year:
-        selected_courses.append("3r")
+        selected_courses = []
+        if first_year:
+            selected_courses.append("1r")
+        if second_year:
+            selected_courses.append("2n")
+        if third_year:
+            selected_courses.append("3r")
+    else:
+        # For CSV, we only show 4t subjects
+        selected_courses = ["4t"]
 
     # Obtener todas las materies filtradas por curso
     all_subjects = set()
@@ -398,6 +418,10 @@ def display_subjects_bar_chart(students):
 
 def display_student_ranking(students):
     st.subheader("Ranking d'alumnes per mitjana numèrica (NA=2.5, AS=5, AN=7.5, AE=10)")
+    
+    # Normalize all students
+    students = [normalize_student_data(s) for s in students]
+    
     mark_to_value = {
         "No assoliment": 2.5,
         "Assoliment satisfactori": 5,
@@ -442,22 +466,32 @@ def display_student_subject_heatmap(students):
     """Display a heatmap of students vs subjects showing marks distribution"""
     st.subheader("Mapa de calor: Alumnes vs. Assignatures")
     
-    # Add course level checkboxes
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        first_year = st.checkbox("1r", value=False, key="heatmap_1r")
-    with col2:
-        second_year = st.checkbox("2n", value=False, key="heatmap_2n")
-    with col3:
-        third_year = st.checkbox("3r", value=True, key="heatmap_3r")
+    # Normalize all students
+    students = [normalize_student_data(s) for s in students]
+    
+    # Check if we have CSV data
+    is_csv = any('numero_avaluacio' in s for s in students)
+    
+    if not is_csv:
+        # Add course level checkboxes (only for JSON)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            first_year = st.checkbox("1r", value=False, key="heatmap_1r")
+        with col2:
+            second_year = st.checkbox("2n", value=False, key="heatmap_2n")
+        with col3:
+            third_year = st.checkbox("3r", value=True, key="heatmap_3r")
 
-    selected_courses = []
-    if first_year:
-        selected_courses.append("1r")
-    if second_year:
-        selected_courses.append("2n")
-    if third_year:
-        selected_courses.append("3r")
+        selected_courses = []
+        if first_year:
+            selected_courses.append("1r")
+        if second_year:
+            selected_courses.append("2n")
+        if third_year:
+            selected_courses.append("3r")
+    else:
+        # For CSV, only show 4t subjects
+        selected_courses = ["4t"]
 
     # Get all subjects for selected courses
     all_subjects = set()
@@ -533,22 +567,33 @@ def display_student_subject_heatmap(students):
 
 def display_subject_statistics(students):
     """Display statistics and comments for a specific subject"""
-    # Add course level checkboxes
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        first_year = st.checkbox("1r", value=False, key="subject_1r")
-    with col2:
-        second_year = st.checkbox("2n", value=False, key="subject_2n")
-    with col3:
-        third_year = st.checkbox("3r", value=True, key="subject_3r")
+    
+    # Normalize all students
+    students = [normalize_student_data(s) for s in students]
+    
+    # Check if we have CSV data
+    is_csv = any('numero_avaluacio' in s for s in students)
+    
+    if not is_csv:
+        # Add course level checkboxes (only for JSON)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            first_year = st.checkbox("1r", value=False, key="subject_1r")
+        with col2:
+            second_year = st.checkbox("2n", value=False, key="subject_2n")
+        with col3:
+            third_year = st.checkbox("3r", value=True, key="subject_3r")
 
-    selected_courses = []
-    if first_year:
-        selected_courses.append("1r")
-    if second_year:
-        selected_courses.append("2n")
-    if third_year:
-        selected_courses.append("3r")
+        selected_courses = []
+        if first_year:
+            selected_courses.append("1r")
+        if second_year:
+            selected_courses.append("2n")
+        if third_year:
+            selected_courses.append("3r")
+    else:
+        # For CSV, only show 4t subjects
+        selected_courses = ["4t"]
     
     # Get unique subjects filtered by selected courses
     all_subjects = set()

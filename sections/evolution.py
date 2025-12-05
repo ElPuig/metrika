@@ -3,9 +3,13 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from utils.constants import MarkConfig
+from utils.data_normalizer import normalize_student_data
 
 def display_evolution_chart(students):
     """Muestra un gráfico de evolución de las notas por trimestre"""
+    # Normalize all students
+    students = [normalize_student_data(s) for s in students]
+    
     # Agrupar datos por trimestre y estudiante
     evolution_data = []
     for student in students:
@@ -32,6 +36,9 @@ def display_evolution_chart(students):
 
 def display_student_evolution(students, selected_student):
     """Muestra la evolución de las notas de un estudiante específico"""
+    # Normalize all students
+    students = [normalize_student_data(s) for s in students]
+    
     # Filtrar datos del estudiante seleccionado
     student_data = [s for s in students if s['nom_cognoms'] == selected_student]
     
@@ -63,6 +70,9 @@ def display_student_evolution(students, selected_student):
 
 def display_subject_evolution(students, selected_subject):
     """Muestra la evolución de las notas de una asignatura específica"""
+    # Normalize all students
+    students = [normalize_student_data(s) for s in students]
+    
     # Preparar datos para el gráfico
     evolution_data = []
     for student in students:
@@ -119,6 +129,9 @@ def display_subject_evolution(students, selected_subject):
 def display_evolution_dashboard(students):
     """Display evolution dashboard for comparing trimester grades"""
     st.subheader("Evolució de Notes per Trimestre")
+    
+    # Normalize all students
+    students = [normalize_student_data(s) for s in students]
     
     # Collect student data by trimester
     trimester_data = []
