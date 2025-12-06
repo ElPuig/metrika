@@ -10,7 +10,7 @@ import time
 
 def show_classroom_table(data:pd.DataFrame, title:str=None):
     with st.expander(f"Tabla global clase ({title})"):
-        st.dataframe(data, use_container_width=True)
+        st.dataframe(data, width='stretch')
 
 
 def subject_visualization(data:pd.DataFrame, selected_subject:str, title:str):
@@ -55,7 +55,7 @@ def student_mark_freq_visualization(data:pd.DataFrame, std_name:str, title:str):
     )
     
     # Display in Streamlit
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, config={'responsive': True})
 
 
 def student_marks_per_subject(data:pd.DataFrame, std_name:str, title:str):
@@ -93,7 +93,7 @@ def student_marks_per_subject(data:pd.DataFrame, std_name:str, title:str):
     )
     
     # Display the bar chart
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, config={'responsive': True})
 
 
 def show_student_evolution(data1:pd.DataFrame, data2:pd.DataFrame, student_name:str, title:str):
@@ -166,7 +166,7 @@ def show_student_evolution(data1:pd.DataFrame, data2:pd.DataFrame, student_name:
     )
     
     # Mostrar el gráfico
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, config={'responsive': True})
     
     # Mostrar tabla con la evolución
     st.subheader("Resumen de Evolución por Asignatura")
@@ -176,7 +176,7 @@ def show_student_evolution(data1:pd.DataFrame, data2:pd.DataFrame, student_name:
     display_df["Trimestre 2"] = display_df["Trimestre 2"].apply(lambda x: MarkConfig.get_mark_from_height(x))
     st.dataframe(
         display_df.sort_values("Evolución", ascending=False),
-        use_container_width=True
+        width='stretch'
     )
     
     # Mostrar resumen general
@@ -240,10 +240,10 @@ def display_marks_pie_chart(student_data):
 
     st.subheader("Distribució de Qualificacions")
     # display table with qualification counts
-    st.dataframe(pd.DataFrame(filtered_counts, index=[0]), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(filtered_counts, index=[0]), width='stretch', hide_index=True)
 
     # Display the chart in Streamlit
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, config={'responsive': True})
 
 
 def display_group_statistics(students):
@@ -288,7 +288,7 @@ def display_group_statistics(students):
 
     st.subheader("Distribució de qualificacions per trimestre")
     # Display the chart in Streamlit
-    st.plotly_chart(fig, use_container_width=True, key=f"group_statistics_{time.time()}")
+    st.plotly_chart(fig, config={'responsive': True})
 
 
 def group_failure_table(students):
@@ -347,7 +347,115 @@ def group_failure_table(students):
         showlegend=False,
     )
     with col2:
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config={'responsive': True})
+
+
+def display_subjects_failure_ranking(students):
+    """Display subjects ranked by failure rate (most failed to least failed)"""
+    if not students:
+        st.info("No hi ha estudiants per mostrar en aquesta taula.")
+        return
+    
+    st.subheader("Assignatures més suspeses")
+    
+    # Normalize all students
+    students = [normalize_student_data(s) for s in students]
+    
+    # Check if we have CSV data (students have 'numero_avaluacio' originally)
+    is_csv = any('numero_avaluacio' in s for s in students)
+    
+    if not is_csv:
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            first_year = st.checkbox("1r", value=False, key="failure_1r")
+        with col2:
+            second_year = st.checkbox("2n", value=False, key="failure_2n")
+        with col3:
+            third_year = st.checkbox("3r", value=True, key="failure_3r")
+
+        selected_courses = []
+        if first_year:
+            selected_courses.append("1r")
+        if second_year:
+            selected_courses.append("2n")
+        if third_year:
+            selected_courses.append("3r")
+    else:
+        # For CSV, we only show 4t subjects
+        selected_courses = ["4t"]
+    
+    # Count failures per subject
+    subject_stats = {}
+    for student in students:
+        for m in student['materies']:
+            if any(c in m['materia'] for c in selected_courses):
+                subject = m['materia']
+                if subject not in subject_stats:
+                    subject_stats[subject] = {'total': 0, 'failures': 0}
+                subject_stats[subject]['total'] += 1
+                if m['qualificacio'] == MarkConfig.NA.value:
+                    subject_stats[subject]['failures'] += 1
+    
+    # Calculate failure rates and create ranking
+    ranking_data = []
+    for subject, stats in subject_stats.items():
+        failure_rate = (stats['failures'] / stats['total'] * 100) if stats['total'] > 0 else 0
+        ranking_data.append({
+            'Assignatura': subject,
+            'Suspensos': stats['failures'],
+            'Total alumnes': stats['total'],
+            '% Suspensos': f"{failure_rate:.1f}%",
+            '_rate': failure_rate  # Hidden column for sorting
+        })
+    
+    # Sort by failure rate (descending)
+    ranking_data = sorted(ranking_data, key=lambda x: x['_rate'], reverse=True)
+    
+    # Remove the helper column for display
+    display_data = [{k: v for k, v in item.items() if k != '_rate'} for item in ranking_data]
+    
+    if display_data:
+        # Display the table
+        df = pd.DataFrame(display_data)
+        
+        # Create bar chart for visualization
+        fig = go.Figure()
+        
+        # Add bars
+        fig.add_trace(go.Bar(
+            y=[item['Assignatura'] for item in ranking_data],
+            x=[item['_rate'] for item in ranking_data],
+            orientation='h',
+            marker=dict(
+                color=[item['_rate'] for item in ranking_data],
+                colorscale=[
+                    [0, '#2ca02c'],      # Green for 0%
+                    [0.25, '#1f77b4'],   # Blue for 25%
+                    [0.5, '#ff7f0e'],    # Orange for 50%
+                    [1, '#d62728']       # Red for 100%
+                ],
+                showscale=False
+            ),
+            text=[f"{item['Suspensos']}/{item['Total alumnes']}" for item in ranking_data],
+            textposition='outside',
+            hovertemplate='<b>%{y}</b><br>% Suspensos: %{x:.1f}%<br><extra></extra>'
+        ))
+        
+        fig.update_layout(
+            xaxis_title="% Suspensos",
+            yaxis_title="",
+            height=max(400, len(ranking_data) * 25),
+            showlegend=False,
+            yaxis={'categoryorder': 'total ascending'}  # Keeps the order we set
+        )
+        
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            st.dataframe(df, hide_index=True, height=max(400, len(ranking_data) * 35 + 38))
+        with col2:
+            st.plotly_chart(fig, config={'responsive': True})
+    else:
+        st.info("Selecciona almenys un curs per veure el rànquing.")
 
 
 def display_subjects_bar_chart(students):
@@ -411,7 +519,7 @@ def display_subjects_bar_chart(students):
             color_discrete_map=MarkConfig.COLOR_MAP.value
         )
         fig.update_layout(height=500, xaxis_title="Assignatura", yaxis_title="Nombre d'alumnes")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config={'responsive': True})
     else:
         st.info("Selecciona almenys un curs per veure el gràfic.")
 
@@ -459,7 +567,7 @@ def display_student_ranking(students):
             colors[i] = 'background-color: #ffb3b3; color: black'
         return colors
     styled_df = df.style.apply(highlight_top_bottom, subset=['Mitjana (0-10)'])
-    st.dataframe(styled_df, hide_index=True, use_container_width=True)
+    st.dataframe(styled_df, hide_index=True, width='stretch')
 
 
 def display_student_subject_heatmap(students):
@@ -562,7 +670,7 @@ def display_student_subject_heatmap(students):
     )
 
     # Display the heatmap
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, config={'responsive': True})
 
 
 def display_subject_statistics(students):
@@ -659,7 +767,7 @@ def display_subject_statistics(students):
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Distribució de qualificacions")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config={'responsive': True})
     with col2:
         # Display comments table
         if comments_data:
@@ -674,7 +782,7 @@ def display_subject_statistics(students):
                     "Comentari": st.column_config.TextColumn("Comentari", width="large")
                 },
                 hide_index=True,
-                use_container_width=True
+                width='stretch'
             )
         else:
             st.info("No s'han trobat comentaris per aquesta assignatura.")

@@ -32,7 +32,7 @@ def display_student_marks(selected_student_data):
                     "Comentari": st.column_config.TextColumn("Comentari", width="large")
                 },
                 hide_index=True,
-                use_container_width=True,
+                width='stretch',
                 height=400
             )
         else:
@@ -61,7 +61,7 @@ def display_student_marks(selected_student_data):
                     "Comentari": st.column_config.TextColumn("Comentari", width="large")
                 },
                 hide_index=True,
-                use_container_width=True,
+                width='stretch',
                 height=200
             )
         
@@ -119,6 +119,6 @@ def display_student_marks(selected_student_data):
                 "Comentari": st.column_config.TextColumn("Comentari", width="large")
             },
             hide_index=True,
-            use_container_width=True,
+            width='stretch',
             height=400
         ) 

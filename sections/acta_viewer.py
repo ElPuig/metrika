@@ -159,7 +159,7 @@ def display_global_view(data):
         legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
     )
     
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, config={'responsive': True})
     
     # Grades distribution histogram
     if all_grades:
@@ -181,7 +181,7 @@ def display_global_view(data):
             bargap=0.1
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config={'responsive': True})
     
     # Student rankings
     st.markdown("---")
@@ -200,7 +200,7 @@ def display_global_view(data):
     df_rankings = pd.DataFrame(student_rankings)
     df_rankings = df_rankings.sort_values('Mitjana', ascending=False, key=lambda x: pd.to_numeric(x.replace('N/A', '0')))
     
-    st.dataframe(df_rankings, use_container_width=True, hide_index=True, height=400)
+    st.dataframe(df_rankings, width='stretch', hide_index=True, height=400)
 
 
 def display_subject_view(data):
@@ -283,7 +283,7 @@ def display_subject_view(data):
             height=400
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config={'responsive': True})
     
     with col2:
         st.markdown("#### 👥 Llista d'Alumnes")
@@ -303,7 +303,7 @@ def display_subject_view(data):
         df_details = pd.DataFrame(subject_details)
         df_details = df_details.sort_values('Alumne')
         
-        st.dataframe(df_details, use_container_width=True, hide_index=True, height=350)
+        st.dataframe(df_details, width='stretch', hide_index=True, height=350)
 
 
 def display_student_view(data):
@@ -396,7 +396,7 @@ def display_student_view(data):
             margin=dict(t=20, b=20, l=20, r=20)
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, config={'responsive': True})
     
     with col2:
         st.markdown("#### 📚 Matèries")
@@ -425,7 +425,7 @@ def display_student_view(data):
         
         styled_df = df_subjects.style.apply(highlight_status, axis=1)
         
-        st.dataframe(styled_df, use_container_width=True, hide_index=True, height=330)
+        st.dataframe(styled_df, width='stretch', hide_index=True, height=330)
     
     # Comments section
     if selected_student.get('comentari_general', '').strip():

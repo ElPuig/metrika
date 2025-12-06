@@ -7,6 +7,7 @@ from sections.visualization import (
     display_marks_pie_chart, 
     display_group_statistics, 
     group_failure_table, 
+    display_subjects_failure_ranking,
     display_subjects_bar_chart, 
     display_student_ranking, 
     display_student_subject_heatmap,
@@ -380,6 +381,7 @@ def main():
             col1, col2 = st.columns(2)
             display_group_statistics(students)
             group_failure_table(students)
+            display_subjects_failure_ranking(students)
             display_subjects_bar_chart(students)
             display_student_subject_heatmap(students)
             display_student_ranking(students)
