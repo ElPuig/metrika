@@ -66,9 +66,9 @@ def display_student_marks(selected_student_data):
             )
         
         # Display general comment
-        if selected_student_data.get('comentari_general'):
-            st.subheader("📝 Comentari General")
-            st.info(selected_student_data['comentari_general'])
+        # if selected_student_data.get('comentari_general'):
+        #     st.subheader("📝 Comentari General")
+        #     st.info(selected_student_data['comentari_general'])
     
     else:
         # JSON format: materies
@@ -107,7 +107,7 @@ def display_student_marks(selected_student_data):
             df = df[mask]
         
         # Sort subjects alphabetically
-        df = df.sort_values('Materia')
+        df = df.sort_values(by='Materia') # type: ignore
         
         # Display the subjects table
         st.subheader("Notes per Materia")

@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import time
 
 
-def show_classroom_table(data:pd.DataFrame, title:str=None):
+def show_classroom_table(data:pd.DataFrame, title:str):
     with st.expander(f"Tabla global clase ({title})"):
         st.dataframe(data, width='stretch')
 
@@ -404,19 +404,15 @@ def display_subjects_failure_ranking(students):
             'Assignatura': subject,
             'Suspensos': stats['failures'],
             'Total alumnes': stats['total'],
-            '% Suspensos': f"{failure_rate:.1f}%",
-            '_rate': failure_rate  # Hidden column for sorting
+            '% Suspensos': failure_rate  # Keep as number for sorting
         })
     
     # Sort by failure rate (descending)
-    ranking_data = sorted(ranking_data, key=lambda x: x['_rate'], reverse=True)
+    ranking_data = sorted(ranking_data, key=lambda x: x['% Suspensos'], reverse=True)
     
-    # Remove the helper column for display
-    display_data = [{k: v for k, v in item.items() if k != '_rate'} for item in ranking_data]
-    
-    if display_data:
+    if ranking_data:
         # Display the table
-        df = pd.DataFrame(display_data)
+        df = pd.DataFrame(ranking_data)
         
         # Create bar chart for visualization
         fig = go.Figure()
@@ -424,10 +420,10 @@ def display_subjects_failure_ranking(students):
         # Add bars
         fig.add_trace(go.Bar(
             y=[item['Assignatura'] for item in ranking_data],
-            x=[item['_rate'] for item in ranking_data],
+            x=[item['% Suspensos'] for item in ranking_data],
             orientation='h',
             marker=dict(
-                color=[item['_rate'] for item in ranking_data],
+                color=[item['% Suspensos'] for item in ranking_data],
                 colorscale=[
                     [0, '#2ca02c'],      # Green for 0%
                     [0.25, '#1f77b4'],   # Blue for 25%
@@ -451,7 +447,12 @@ def display_subjects_failure_ranking(students):
         
         col1, col2 = st.columns([1, 2])
         with col1:
-            st.dataframe(df, hide_index=True, height=max(400, len(ranking_data) * 35 + 38))
+            # Format column for display while keeping sorting numeric
+            st.dataframe(
+                df.style.format({'% Suspensos': '{:.1f}%'}),
+                hide_index=True,
+                height=max(400, len(ranking_data) * 35 + 38)
+            )
         with col2:
             st.plotly_chart(fig, config={'responsive': True})
     else:
