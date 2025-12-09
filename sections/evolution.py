@@ -32,7 +32,7 @@ def display_evolution_chart(students):
                  title='Evolució de les qualificacions per trimestre',
                  labels={'trimestre': 'Trimestre', 'qualificacio': 'Qualificació'})
     
-    st.plotly_chart(fig, config={'responsive': True})
+    st.plotly_chart(fig, config={'responsive': True}, key='evolution_chart')
 
 def display_student_evolution(students, selected_student):
     """Muestra la evolución de las notas de un estudiante específico"""
@@ -66,7 +66,7 @@ def display_student_evolution(students, selected_student):
                  title=f'Evolució de les qualificacions de {selected_student}',
                  labels={'trimestre': 'Trimestre', 'qualificacio': 'Qualificació'})
     
-    st.plotly_chart(fig, config={'responsive': True})
+    st.plotly_chart(fig, config={'responsive': True}, key='student_evolution')
 
 def display_subject_evolution(students, selected_subject):
     """Muestra la evolución de las notas de una asignatura específica"""
@@ -124,7 +124,7 @@ def display_subject_evolution(students, selected_subject):
         )
     )
     
-    st.plotly_chart(fig, config={'responsive': True})
+    st.plotly_chart(fig, config={'responsive': True}, key='subject_evolution')
 
 def display_evolution_dashboard(students):
     """Display evolution dashboard for comparing trimester grades"""
@@ -247,4 +247,4 @@ def display_evolution_dashboard(students):
             legend_title='Materies'
         )
     
-    st.plotly_chart(fig, config={'responsive': True}) 
+    st.plotly_chart(fig, config={'responsive': True}, key='evolution_dashboard') 

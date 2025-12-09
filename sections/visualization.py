@@ -28,7 +28,7 @@ def subject_visualization(data:pd.DataFrame, selected_subject:str, title:str):
     )
     
     # Display the pie chart
-    st.plotly_chart(figGlobal)
+    st.plotly_chart(figGlobal, key='subject_visualization_pie')
 
 
 def student_mark_freq_visualization(data:pd.DataFrame, std_name:str, title:str):
@@ -55,7 +55,7 @@ def student_mark_freq_visualization(data:pd.DataFrame, std_name:str, title:str):
     )
     
     # Display in Streamlit
-    st.plotly_chart(fig, config={'responsive': True})
+    st.plotly_chart(fig, config={'responsive': True}, key='student_mark_freq_pie')
 
 
 def student_marks_per_subject(data:pd.DataFrame, std_name:str, title:str):
@@ -93,7 +93,7 @@ def student_marks_per_subject(data:pd.DataFrame, std_name:str, title:str):
     )
     
     # Display the bar chart
-    st.plotly_chart(fig, config={'responsive': True})
+    st.plotly_chart(fig, config={'responsive': True}, key='student_marks_bar')
 
 
 def show_student_evolution(data1:pd.DataFrame, data2:pd.DataFrame, student_name:str, title:str):
@@ -166,7 +166,7 @@ def show_student_evolution(data1:pd.DataFrame, data2:pd.DataFrame, student_name:
     )
     
     # Mostrar el gráfico
-    st.plotly_chart(fig, config={'responsive': True})
+    st.plotly_chart(fig, config={'responsive': True}, key='student_evolution_chart')
     
     # Mostrar tabla con la evolución
     st.subheader("Resumen de Evolución por Asignatura")
@@ -242,7 +242,7 @@ def display_marks_pie_chart(student_data):
     st.dataframe(pd.DataFrame(filtered_counts, index=[0]), hide_index=True)
 
     # Display the chart in Streamlit
-    st.plotly_chart(fig, config={'responsive': True})
+    st.plotly_chart(fig, config={'responsive': True}, key='marks_pie_chart')
 
 
 def display_group_statistics(students):
@@ -287,7 +287,7 @@ def display_group_statistics(students):
 
     st.subheader("Distribució de qualificacions per trimestre")
     # Display the chart in Streamlit
-    st.plotly_chart(fig, config={'responsive': True})
+    st.plotly_chart(fig, config={'responsive': True}, key='group_statistics_pie')
 
 
 def group_failure_table(students):
@@ -346,7 +346,7 @@ def group_failure_table(students):
         showlegend=False,
     )
     with col2:
-        st.plotly_chart(fig, config={'responsive': True})
+        st.plotly_chart(fig, config={'responsive': True}, key='failure_table_pie')
 
 
 def display_subjects_failure_ranking(students):
@@ -453,7 +453,7 @@ def display_subjects_failure_ranking(students):
                 height=max(400, len(ranking_data) * 35 + 38)
             )
         with col2:
-            st.plotly_chart(fig, config={'responsive': True})
+            st.plotly_chart(fig, config={'responsive': True}, key='failure_ranking_bar')
     else:
         st.info("Selecciona almenys un curs per veure el rànquing.")
 
@@ -519,7 +519,7 @@ def display_subjects_bar_chart(students):
             color_discrete_map=MarkConfig.COLOR_MAP.value
         )
         fig.update_layout(height=500, xaxis_title="Assignatura", yaxis_title="Nombre d'alumnes")
-        st.plotly_chart(fig, config={'responsive': True})
+        st.plotly_chart(fig, config={'responsive': True}, key='subjects_bar_chart')
     else:
         st.info("Selecciona almenys un curs per veure el gràfic.")
 
@@ -670,7 +670,7 @@ def display_student_subject_heatmap(students):
     )
 
     # Display the heatmap
-    st.plotly_chart(fig, config={'responsive': True})
+    st.plotly_chart(fig, config={'responsive': True}, key='student_subject_heatmap')
 
 
 def display_subject_statistics(students):
@@ -767,7 +767,7 @@ def display_subject_statistics(students):
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Distribució de qualificacions")
-        st.plotly_chart(fig, config={'responsive': True})
+        st.plotly_chart(fig, config={'responsive': True}, key='subject_statistics_pie')
     with col2:
         # Display comments table
         if comments_data:

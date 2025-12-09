@@ -159,7 +159,7 @@ def display_global_view(data):
         legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
     )
     
-    st.plotly_chart(fig, config={'responsive': True})
+    st.plotly_chart(fig, config={'responsive': True}, key='acta_global_pie')
     
     # Grades distribution histogram
     if all_grades:
@@ -181,7 +181,7 @@ def display_global_view(data):
             bargap=0.1
         )
         
-        st.plotly_chart(fig, config={'responsive': True})
+        st.plotly_chart(fig, config={'responsive': True}, key='acta_grades_histogram')
     
     # Student rankings
     st.markdown("---")
@@ -283,7 +283,7 @@ def display_subject_view(data):
             height=400
         )
         
-        st.plotly_chart(fig, config={'responsive': True})
+        st.plotly_chart(fig, config={'responsive': True}, key='acta_subject_pie')
     
     with col2:
         st.markdown("#### 👥 Llista d'Alumnes")
@@ -396,7 +396,7 @@ def display_student_view(data):
             margin=dict(t=20, b=20, l=20, r=20)
         )
         
-        st.plotly_chart(fig, config={'responsive': True})
+        st.plotly_chart(fig, config={'responsive': True}, key='acta_student_pie')
     
     with col2:
         st.markdown("#### 📚 Matèries")
