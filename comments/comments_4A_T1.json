@@ -1,0 +1,22 @@
+{
+  "student_comments": {
+    "23788065074": {
+      "general": "Pot millorar"
+    },
+    "4922195006": {
+      "general": "Molt bé!"
+    }
+  },
+  "subject_comments": {
+    "Biologia i Geologia 4t": "COsta molt treballar amb ells en aqusta assignatura"
+  },
+  "group_comments": {
+    "ESO LOEM401": "Es pot treballar amb ells. Conflictes puntuals a resoldre."
+  },
+  "session_comments": {},
+  "metadata": {
+    "created": "2025-12-09T14:41:18.565426",
+    "last_modified": "2025-12-09T14:43:12.574491",
+    "version": "1.0.0"
+  }
+}
