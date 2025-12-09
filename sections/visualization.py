@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from utils.constants import DataConfig, MarkConfig
 from utils.data_normalizer import normalize_student_data
+from utils.comments_manager import render_comment_input, render_comment_display
 import plotly.express as px
 import plotly.graph_objects as go
 import time
@@ -245,7 +246,7 @@ def display_marks_pie_chart(student_data):
     st.plotly_chart(fig, config={'responsive': True}, key='marks_pie_chart')
 
 
-def display_group_statistics(students):
+def display_group_statistics(students, comments_manager=None):
     """Display statistics for the entire group"""
     # Normalize all students
     students = [normalize_student_data(s) for s in students]
@@ -288,6 +289,31 @@ def display_group_statistics(students):
     st.subheader("Distribució de qualificacions per trimestre")
     # Display the chart in Streamlit
     st.plotly_chart(fig, config={'responsive': True}, key='group_statistics_pie')
+    
+    # Add group comments functionality if available
+    if comments_manager and students:
+        # Get group code from first student
+        group_code = students[0].get('grup_codi', students[0].get('grup', ''))
+        if group_code:
+            st.subheader("💬 Comentaris del grup")
+            
+            # Display existing group comment
+            render_comment_display(
+                comments_manager, 
+                "group", 
+                group_code, 
+                show_empty=False
+            )
+            
+            # Input for new/edit group comment
+            render_comment_input(
+                comments_manager,
+                "group",
+                group_code,
+                label=f"Comentari sobre el grup {group_code}",
+                key_suffix="group_stats",
+                placeholder="Afegeix un comentari general sobre aquest grup..."
+            )
 
 
 def group_failure_table(students):
@@ -712,7 +738,7 @@ def display_student_subject_heatmap(students):
     st.plotly_chart(fig, config={'responsive': True}, key='student_subject_heatmap')
 
 
-def display_subject_statistics(students):
+def display_subject_statistics(students, comments_manager=None):
     """Display statistics and comments for a specific subject"""
     
     # Normalize all students
@@ -837,4 +863,26 @@ def display_subject_statistics(students):
             )
         else:
             st.info("No s'han trobat comentaris per aquesta assignatura.")
+    
+    # Add subject comments functionality if available
+    if comments_manager and selected_subject:
+        st.subheader("💬 Comentaris sobre l'assignatura")
+        
+        # Display existing subject comment
+        render_comment_display(
+            comments_manager, 
+            "subject", 
+            selected_subject, 
+            show_empty=False
+        )
+        
+        # Input for new/edit subject comment
+        render_comment_input(
+            comments_manager,
+            "subject",
+            selected_subject,
+            label=f"Comentari sobre {selected_subject}",
+            key_suffix="subject_stats",
+            placeholder="Afegeix un comentari general sobre aquesta assignatura..."
+        )
     

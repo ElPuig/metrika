@@ -17,6 +17,7 @@ from sections.evolution import display_evolution_dashboard
 from sections.acta_viewer import display_acta_viewer
 from utils.constants import MarkConfig, AppConfig
 from utils.acta_csv_loader import parse_uploaded_acta_csv, get_acta_csv_info
+from utils.comments_manager import CommentsManager, get_session_id, render_comments_management_sidebar
 import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
@@ -261,6 +262,10 @@ def main():
         initial_sidebar_state="expanded"
     )
     
+    # Initialize comments manager
+    if 'comments_manager' not in st.session_state:
+        st.session_state.comments_manager = CommentsManager()
+    
     # Sidebar with version information
     with st.sidebar:
         st.markdown("---")
@@ -378,9 +383,12 @@ def main():
         # Create tabs for different views
         tab1, tab2, tab3, tab4 = st.tabs(["Grup", "Materia", "Alumne", "Evolució"])
         
+        # Add comments management to sidebar
+        render_comments_management_sidebar(st.session_state.comments_manager)
+        
         with tab1:
             col1, col2 = st.columns(2)
-            display_group_statistics(students)
+            display_group_statistics(students, comments_manager=st.session_state.comments_manager)
             group_failure_table(students)
             display_subjects_failure_ranking(students)
             display_subjects_bar_chart(students)
@@ -389,7 +397,7 @@ def main():
         
         with tab2:
             # Display subject statistics
-            display_subject_statistics(students)
+            display_subject_statistics(students, comments_manager=st.session_state.comments_manager)
         
         with tab3:    
             # Display student selector and get selected student data
@@ -397,7 +405,7 @@ def main():
             col1, col2 = st.columns(2)
             with col1:
                 # Display student marks
-                display_student_marks(selected_student_data)
+                display_student_marks(selected_student_data, comments_manager=st.session_state.comments_manager)
             with col2:
                 # Display pie chart of marks
                 display_marks_pie_chart(selected_student_data)
@@ -412,7 +420,7 @@ def main():
             if len(all_trimesters) < 2:
                 st.warning("Es necessiten almenys dos trimestres per visualitzar l'evolució")
             else:
-                display_evolution_dashboard(all_trimesters)
+                display_evolution_dashboard(all_trimesters, comments_manager=st.session_state.comments_manager)
     
     elif menu == "Actes CSV":
         display_acta_viewer()

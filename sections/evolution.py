@@ -4,6 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from utils.constants import MarkConfig
 from utils.data_normalizer import normalize_student_data
+from utils.comments_manager import render_comment_input, render_comment_display, get_session_id
 
 def display_evolution_chart(students):
     """Muestra un gráfico de evolución de las notas por trimestre"""
@@ -126,7 +127,7 @@ def display_subject_evolution(students, selected_subject):
     
     st.plotly_chart(fig, config={'responsive': True}, key='subject_evolution')
 
-def display_evolution_dashboard(students):
+def display_evolution_dashboard(students, comments_manager=None):
     """Display evolution dashboard for comparing trimester grades"""
     st.subheader("Evolució de Notes per Trimestre")
     
@@ -247,4 +248,28 @@ def display_evolution_dashboard(students):
             legend_title='Materies'
         )
     
-    st.plotly_chart(fig, config={'responsive': True}, key='evolution_dashboard') 
+    st.plotly_chart(fig, config={'responsive': True}, key='evolution_dashboard')
+    
+    # Add session comments functionality if available
+    if comments_manager and students:
+        session_id = get_session_id(students)
+        if session_id:
+            st.subheader("💬 Comentaris de la sessió")
+            
+            # Display existing session comment
+            render_comment_display(
+                comments_manager, 
+                "session", 
+                session_id, 
+                show_empty=False
+            )
+            
+            # Input for new/edit session comment
+            render_comment_input(
+                comments_manager,
+                "session",
+                session_id,
+                label=f"Comentari sobre la sessió {session_id}",
+                key_suffix="evolution",
+                placeholder="Afegeix un comentari sobre l'evolució d'aquesta sessió..."
+            ) 

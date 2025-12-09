@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
+from utils.comments_manager import render_comment_input, render_comment_display
 
-def display_student_marks(selected_student_data):
+def display_student_marks(selected_student_data, comments_manager=None):
     """Display student marks in a filtered and sorted table"""
     
     # Check if this is CSV data or JSON data
@@ -67,6 +68,30 @@ def display_student_marks(selected_student_data):
         # if selected_student_data.get('comentari_general'):
         #     st.subheader("📝 Comentari General")
         #     st.info(selected_student_data['comentari_general'])
+        
+        # Add comments functionality if available
+        if comments_manager:
+            student_id = selected_student_data.get('id', '')
+            if student_id:
+                st.subheader("💬 Comentaris Adicionals")
+                
+                # Display existing general comment
+                render_comment_display(
+                    comments_manager, 
+                    "student", 
+                    student_id, 
+                    show_empty=False
+                )
+                
+                # Input for new/edit general comment
+                render_comment_input(
+                    comments_manager,
+                    "student",
+                    student_id,
+                    label="Comentari general de l'alumne",
+                    key_suffix="general",
+                    placeholder="Afegeix un comentari general sobre l'alumne..."
+                )
     
     else:
         # JSON format: materies
@@ -118,4 +143,28 @@ def display_student_marks(selected_student_data):
             },
             hide_index=True,
             height=400
-        ) 
+        )
+        
+        # Add comments functionality if available
+        if comments_manager:
+            student_id = selected_student_data.get('id', '')
+            if student_id:
+                st.subheader("💬 Comentaris Adicionals")
+                
+                # Display existing general comment
+                render_comment_display(
+                    comments_manager, 
+                    "student", 
+                    student_id, 
+                    show_empty=False
+                )
+                
+                # Input for new/edit general comment
+                render_comment_input(
+                    comments_manager,
+                    "student",
+                    student_id,
+                    label="Comentari general de l'alumne",
+                    key_suffix="general_json",
+                    placeholder="Afegeix un comentari general sobre l'alumne..."
+                ) 
