@@ -14,6 +14,32 @@ import os
 from typing import List, Dict, Any
 
 
+def _pending_markers_for_level(level: Any) -> List[str]:
+    """Return the subject markers that should count as pending for a given level."""
+    level_str = '' if pd.isna(level) else str(level).strip()
+    mapping = {
+        '1': [],
+        '2': ['1r'],
+        '3': ['1r', '2n'],
+        '4': ['1r', '2n', '3r']
+    }
+    # Fallback keeps previous behaviour (all lower levels) if level is missing or unexpected
+    return mapping.get(level_str, ['1r', '2n', '3r'])
+
+
+def _current_level_marker(level: Any) -> str:
+    """Return the subject marker for current level subjects."""
+    level_str = '' if pd.isna(level) else str(level).strip()
+    mapping = {
+        '1': '1r',
+        '2': '2n',
+        '3': '3r',
+        '4': '4t'
+    }
+    # Fallback to '4t' for backwards compatibility
+    return mapping.get(level_str, '4t')
+
+
 def parse_acta_csv(file_path: str) -> List[Dict[str, Any]]:
     """
     Parse a CSV acta file and return a list of student dictionaries.
@@ -30,6 +56,10 @@ def parse_acta_csv(file_path: str) -> List[Dict[str, Any]]:
     students = []
     
     for _, row in df.iterrows():
+        student_level = row.get('nivell', None)
+        pending_markers = _pending_markers_for_level(student_level)
+        current_marker = _current_level_marker(student_level)
+
         # Extract basic student info
         student = {
             'id': str(row['id']),
@@ -61,17 +91,19 @@ def parse_acta_csv(file_path: str) -> List[Dict[str, Any]]:
             if pd.isna(subject_name) or subject_name == '':
                 continue
             
+            subject_name_str = str(subject_name)
+
             # Create subject dictionary
             subject_data = {
-                'subject': str(subject_name),
+                'subject': subject_name_str,
                 'qualification': str(qualification) if not pd.isna(qualification) else '',
                 'comment': str(comment) if not pd.isna(comment) else ''
             }
             
-            # Determine if it's a current level subject (4t) or pending (1r, 2n, 3r)
-            if '4t' in str(subject_name):
+            # Determine if it's a current level subject or pending depending on level markers
+            if current_marker in subject_name_str:
                 student['subjects'].append(subject_data)
-            elif any(level in str(subject_name) for level in ['1r', '2n', '3r']):
+            elif any(marker in subject_name_str for marker in pending_markers):
                 student['pending_subjects'].append(subject_data)
         
         students.append(student)
@@ -121,6 +153,10 @@ def parse_uploaded_acta_csv(uploaded_file) -> List[Dict[str, Any]]:
     students = []
     
     for _, row in df.iterrows():
+        student_level = row.get('nivell', None)
+        pending_markers = _pending_markers_for_level(student_level)
+        current_marker = _current_level_marker(student_level)
+
         # Extract basic student info
         student = {
             'id': str(row['id']),
@@ -152,17 +188,19 @@ def parse_uploaded_acta_csv(uploaded_file) -> List[Dict[str, Any]]:
             if pd.isna(subject_name) or subject_name == '':
                 continue
             
+            subject_name_str = str(subject_name)
+
             # Create subject dictionary
             subject_data = {
-                'subject': str(subject_name),
+                'subject': subject_name_str,
                 'qualification': str(qualification) if not pd.isna(qualification) else '',
                 'comment': str(comment) if not pd.isna(comment) else ''
             }
             
-            # Determine if it's a current level subject (4t) or pending (1r, 2n, 3r)
-            if '4t' in str(subject_name):
+            # Determine if it's a current level subject or pending depending on level markers
+            if current_marker in subject_name_str:
                 student['subjects'].append(subject_data)
-            elif any(level in str(subject_name) for level in ['1r', '2n', '3r']):
+            elif any(marker in subject_name_str for marker in pending_markers):
                 student['pending_subjects'].append(subject_data)
         
         students.append(student)

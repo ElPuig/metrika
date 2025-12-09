@@ -380,8 +380,21 @@ def display_subjects_failure_ranking(students):
         if third_year:
             selected_courses.append("3r")
     else:
-        # For CSV, we only show 4t subjects
-        selected_courses = ["4t"]
+        # For CSV, detect the current level and use appropriate subjects
+        # Get the level from first student to determine current level marker
+        if students:
+            first_student = students[0]
+            student_level = first_student.get('nivell', 4)  # Default to 4 if not found
+            level_to_marker = {
+                1: '1r',
+                2: '2n', 
+                3: '3r',
+                4: '4t'
+            }
+            current_marker = level_to_marker.get(student_level, '4t')
+            selected_courses = [current_marker]
+        else:
+            selected_courses = ["4t"]  # Fallback
     
     # Count failures per subject
     subject_stats = {}
@@ -485,8 +498,21 @@ def display_subjects_bar_chart(students):
         if third_year:
             selected_courses.append("3r")
     else:
-        # For CSV, we only show 4t subjects
-        selected_courses = ["4t"]
+        # For CSV, detect the current level and use appropriate subjects
+        # Get the level from first student to determine current level marker
+        if students:
+            first_student = students[0]
+            student_level = first_student.get('nivell', 4)  # Default to 4 if not found
+            level_to_marker = {
+                1: '1r',
+                2: '2n', 
+                3: '3r',
+                4: '4t'
+            }
+            current_marker = level_to_marker.get(student_level, '4t')
+            selected_courses = [current_marker]
+        else:
+            selected_courses = ["4t"]  # Fallback
 
     # Obtener todas las materies filtradas por curso
     all_subjects = set()
@@ -598,8 +624,21 @@ def display_student_subject_heatmap(students):
         if third_year:
             selected_courses.append("3r")
     else:
-        # For CSV, only show 4t subjects
-        selected_courses = ["4t"]
+        # For CSV, detect the current level and use appropriate subjects
+        # Get the level from first student to determine current level marker
+        if students:
+            first_student = students[0]
+            student_level = first_student.get('nivell', 4)  # Default to 4 if not found
+            level_to_marker = {
+                1: '1r',
+                2: '2n', 
+                3: '3r',
+                4: '4t'
+            }
+            current_marker = level_to_marker.get(student_level, '4t')
+            selected_courses = [current_marker]
+        else:
+            selected_courses = ["4t"]  # Fallback
 
     # Get all subjects for selected courses
     all_subjects = set()
@@ -700,8 +739,21 @@ def display_subject_statistics(students):
         if third_year:
             selected_courses.append("3r")
     else:
-        # For CSV, only show 4t subjects
-        selected_courses = ["4t"]
+        # For CSV, detect the current level and use appropriate subjects
+        # Get the level from first student to determine current level marker
+        if students:
+            first_student = students[0]
+            student_level = first_student.get('nivell', 4)  # Default to 4 if not found
+            level_to_marker = {
+                1: '1r',
+                2: '2n', 
+                3: '3r',
+                4: '4t'
+            }
+            current_marker = level_to_marker.get(student_level, '4t')
+            selected_courses = [current_marker]
+        else:
+            selected_courses = ["4t"]  # Fallback
     
     # Get unique subjects filtered by selected courses
     all_subjects = set()
