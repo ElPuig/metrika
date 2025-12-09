@@ -192,6 +192,27 @@ streamlit run app.py
 - Generació de dades per diferents trimestres
 - Manteniment de la coherència en les dades generades
 
+## Sistema de Comentaris
+
+El sistema de comentaris està integrat a totes les vistes principals i desa la informació a `comments_data.json` per mantenir-la entre sessions.
+
+**Funcionalitat clau**
+- Tipus de comentari: alumnes, matèries, grups i sessions (trimestre+grup)
+- Persistència automàtica i recuperació en iniciar l'aplicació
+- Gestió des de la barra lateral: estadístiques, exportació/importació, esborrar-ho tot
+- Suport d'importació/exportació amb fitxers JSON amb marca de temps
+
+**On apareixen**
+- Vista Alumne: comentaris generals després de les taules de notes
+- Vista Materia: comentaris específics després de les estadístiques
+- Vista Grup: comentaris globals sobre el grup
+- Vista Evolució: comentaris per combinacions trimestre/grup
+
+**Com utilitzar-los**
+1. Escriu el comentari al text area corresponent i prem "Desar"; queda guardat al moment.
+2. Per importar/exportar o netejar-los, obre la secció "Gestió de Comentaris" a la barra lateral.
+3. Els comentaris importats es fusionen amb els existents; l'esborrat elimina totes les entrades.
+
 ## Dependències
 
 El projecte utilitza diversos paquets Python clau:

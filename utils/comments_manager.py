@@ -170,7 +170,7 @@ def render_comment_input(
     
     # Create unique key for the text area
     text_area_key = f"comment_{comment_type}_{identifier}_{key_suffix}"
-    save_button_key = f"save_comment_{comment_type}_{identifier}_{key_suffix}"
+    form_key = f"comment_form_{comment_type}_{identifier}_{key_suffix}"
     
     # Get existing comment
     if comment_type == "student":
@@ -188,23 +188,25 @@ def render_comment_input(
         existing_comment = comment_manager.get_session_comment(identifier)
     else:
         existing_comment = ""
-    
-    # Create columns for text area and save button
-    col1, col2 = st.columns([4, 1])
-    
-    with col1:
-        comment = st.text_area(
-            label,
-            value=existing_comment,
-            key=text_area_key,
-            placeholder=placeholder,
-            height=80
-        )
-    
-    with col2:
-        st.write("")  # Add spacing
-        st.write("")
-        if st.button("💾 Desar", key=save_button_key, help="Desar comentari"):
+
+    # Use a form to avoid re-running the whole app on every keystroke
+    with st.form(form_key):
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            comment = st.text_area(
+                label,
+                value=existing_comment,
+                key=text_area_key,
+                placeholder=placeholder,
+                height=80
+            )
+
+        with col2:
+            st.write("")  # Add spacing
+            st.write("")
+            submitted = st.form_submit_button("💾 Desar", help="Desar comentari")
+
+        if submitted:
             # Save comment based on type
             if comment_type == "student":
                 parts = identifier.split("_", 1)
@@ -219,10 +221,10 @@ def render_comment_input(
                 comment_manager.add_group_comment(identifier, comment)
             elif comment_type == "session":
                 comment_manager.add_session_comment(identifier, comment)
-            
+
             st.success("Comentari desat!")
-            st.rerun()
-    
+            # st.info(f"💬 **Comentari:** {comment}")
+
     return comment
 
 
@@ -250,12 +252,14 @@ def render_comment_display(
     else:
         comment = ""
     
-    if comment or show_empty:
-        if comment:
-            st.info(f"💬 **Comentari:** {comment}")
-        elif show_empty:
-            st.info("💬 Sense comentaris adicionals")
-        return comment
+    # if comment or show_empty:
+    #     if comment:
+    #         # st.info(f"💬 **Comentari:** {comment}")
+    #         pass
+    #     elif show_empty:
+    #         # st.info("💬 Sense comentaris adicionals")
+    #         pass
+    #     return comment
     
     return None
 

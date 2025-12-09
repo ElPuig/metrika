@@ -5,10 +5,14 @@
     },
     "4922195006": {
       "general": "Molt bé!"
+    },
+    "16869749268": {
+      "general": "La vida te da sorpresas, sorpresas te da la vida."
     }
   },
   "subject_comments": {
-    "Biologia i Geologia 4t": "COsta molt treballar amb ells en aqusta assignatura"
+    "Biologia i Geologia 4t": "Costa molt treballar amb ells en aquesta assignatura: examen sorpresa cada vegada que no compleixin amb un ambient minim per  a l'estudi.",
+    "Ciències Socials: Geografia i Història 4t": "Lo que cua?"
   },
   "group_comments": {
     "ESO LOEM401": "Es pot treballar amb ells. Conflictes puntuals a resoldre."
@@ -16,7 +20,7 @@
   "session_comments": {},
   "metadata": {
     "created": "2025-12-09T14:44:25.074216",
-    "last_modified": "2025-12-09T14:46:14.078197",
+    "last_modified": "2025-12-09T20:02:42.661142",
     "version": "1.0.0"
   }
 }

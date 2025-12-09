@@ -281,153 +281,128 @@ def main():
         
         st.markdown("---")
     
-    # Sidebar menu
-    menu = st.sidebar.selectbox(
-        "Menú",
-        ["Estadísticas", "Actes CSV (CF)", "Convertir CSV"]
+    # Always show Estadísticas (menu removed)
+    st.title("Sistema de Visualització de Notes")
+    
+    # File type selector
+    file_type = st.radio(
+        "Tipus de fitxer",
+        ["JSON", "CSV (Actes)"],
+        horizontal=True,
+        index=1,
+        help="Selecciona el tipus de fitxer que vols carregar"
     )
     
-    if menu == "Estadísticas":
-        st.title("Sistema de Visualització de Notes")
-        
-        # File type selector
-        file_type = st.radio(
-            "Tipus de fitxer",
-            ["JSON", "CSV (Actes)"],
-            horizontal=True,
-            index=1,
-            help="Selecciona el tipus de fitxer que vols carregar"
+    if file_type == "JSON":
+        # Create a drag and drop file uploader for JSON files
+        uploaded_files = st.file_uploader(
+            "Arrossega els fitxers JSON aquí (T1.json, T2.json, T3.json)",
+            type=['json'],
+            accept_multiple_files=True,
+            help="Selecciona els fitxers JSON que vols visualitzar"
         )
         
-        if file_type == "JSON":
-            # Create a drag and drop file uploader for JSON files
-            uploaded_files = st.file_uploader(
-                "Arrossega els fitxers JSON aquí (T1.json, T2.json, T3.json)",
-                type=['json'],
-                accept_multiple_files=True,
-                help="Selecciona els fitxers JSON que vols visualitzar"
-            )
-            
-            if not uploaded_files:
-                st.warning("Arrossega almenys un fitxer JSON per visualitzar")
-                return
-            
-            # Load all uploaded files to get their metadata
-            all_students, file_info, version_warnings = load_uploaded_json_files(uploaded_files)
-            
-        else:  # CSV
-            # Create a drag and drop file uploader for CSV files
-            uploaded_files = st.file_uploader(
-                "Arrossega els fitxers CSV d'actes aquí",
-                type=['csv'],
-                accept_multiple_files=True,
-                help="Selecciona els fitxers CSV d'actes que vols visualitzar"
-            )
-            
-            if not uploaded_files:
-                st.warning("Arrossega almenys un fitxer CSV per visualitzar")
-                return
-            
-            # Load all uploaded CSV files
-            all_students, file_info, version_warnings = load_uploaded_csv_acta_files(uploaded_files)
-        
-        if not all_students:
-            st.error("No s'han pogut carregar estudiants dels fitxers seleccionats")
+        if not uploaded_files:
+            st.warning("Arrossega almenys un fitxer JSON per visualitzar")
             return
         
-        # Show version compatibility warnings
-        if version_warnings:
-            st.warning("**Advertències de compatibilitat de versions:**")
-            for warning in version_warnings:
-                st.markdown(f"• {warning}")
-            st.markdown("---")
+        # Load all uploaded files to get their metadata
+        all_students, file_info, version_warnings = load_uploaded_json_files(uploaded_files)
         
-        # Display selected files with their display names
-        st.subheader("Fitxers seleccionats:")
-        for uploaded_file in uploaded_files:
-            if uploaded_file.name in file_info:
-                display_name = file_info[uploaded_file.name]['display_name']
-                grup = file_info[uploaded_file.name]['grup']
-                trimestre = file_info[uploaded_file.name]['trimestre']
-                version = file_info[uploaded_file.name]['version']
-                st.write(f"📄 {uploaded_file.name} → {display_name} (Grup: {grup}, Trimestre: {trimestre}, Versió: {version})")
-            else:
-                st.write(f"📄 {uploaded_file.name}")
-        
-        # Create trimester selector based on available trimesters
-        available_trimesters = []
-        for uploaded_file in uploaded_files:
-            if uploaded_file.name in file_info:
-                available_trimesters.append(uploaded_file.name)
-        
-        if not available_trimesters:
-            st.error("No s'han trobat fitxers vàlids per seleccionar")
-            return
-        
-        # Selector de trimestre
-        trimestre = st.selectbox(
-            "Selecciona el trimestre",
-            available_trimesters,
-            index=0,
-            key="trimester_selector",
-            format_func=lambda x: file_info[x]['display_name'] if x in file_info else x
+    else:  # CSV
+        # Create a drag and drop file uploader for CSV files
+        uploaded_files = st.file_uploader(
+            "Arrossega els fitxers CSV d'actes aquí",
+            type=['csv'],
+            accept_multiple_files=True,
+            help="Selecciona els fitxers CSV d'actes que vols visualitzar"
         )
         
-        # Cargar estudiantes según el trimestre seleccionado
-        selected_file = next(f for f in uploaded_files if f.name == trimestre)
-        if file_type == "JSON":
-            students, _, _ = load_uploaded_json_files([selected_file])
+        if not uploaded_files:
+            st.warning("Arrossega almenys un fitxer CSV per visualitzar")
+            return
+        
+        # Load all uploaded CSV files
+        all_students, file_info, version_warnings = load_uploaded_csv_acta_files(uploaded_files)
+    
+    if not all_students:
+        st.error("No s'han pogut carregar estudiants dels fitxers seleccionats")
+        return
+    
+    # Show version compatibility warnings
+    if version_warnings:
+        st.warning("**Advertències de compatibilitat de versions:**")
+        for warning in version_warnings:
+            st.markdown(f"• {warning}")
+        st.markdown("---")
+    
+    # Display selected files with their display names
+    st.subheader("Fitxers seleccionats:")
+    for uploaded_file in uploaded_files:
+        if uploaded_file.name in file_info:
+            display_name = file_info[uploaded_file.name]['display_name']
+            grup = file_info[uploaded_file.name]['grup']
+            trimestre = file_info[uploaded_file.name]['trimestre']
+            version = file_info[uploaded_file.name]['version']
+            st.write(f"📄 {uploaded_file.name} → {display_name} (Grup: {grup}, Trimestre: {trimestre}, Versió: {version})")
         else:
-            students, _, _ = load_uploaded_csv_acta_files([selected_file])
-        
-        # Create tabs for different views
-        tab1, tab2, tab3, tab4 = st.tabs(["Grup", "Materia", "Alumne", "Evolució"])
-        
-        # Add comments management to sidebar
-        render_comments_management_sidebar(st.session_state.comments_manager)
-        
-        with tab1:
-            col1, col2 = st.columns(2)
-            display_group_statistics(students, comments_manager=st.session_state.comments_manager)
-            group_failure_table(students)
-            display_subjects_failure_ranking(students)
-            display_subjects_bar_chart(students)
-            display_student_subject_heatmap(students)
-            display_student_ranking(students)
-        
-        with tab2:
-            # Display subject statistics
-            display_subject_statistics(students, comments_manager=st.session_state.comments_manager)
-        
-        with tab3:    
-            # Display student selector and get selected student data
-            selected_student_data = display_student_selector(students)
-            col1, col2 = st.columns(2)
-            with col1:
-                # Display student marks
-                display_student_marks(selected_student_data, comments_manager=st.session_state.comments_manager)
-            with col2:
-                # Display pie chart of marks
-                display_marks_pie_chart(selected_student_data)
-            
-        with tab4:
-            # Load all trimesters for evolution comparison
-            if file_type == "JSON":
-                all_trimesters, _, _ = load_uploaded_json_files(uploaded_files)
-            else:
-                all_trimesters, _, _ = load_uploaded_csv_acta_files(uploaded_files)
-            
-            if len(all_trimesters) < 2:
-                st.warning("Es necessiten almenys dos trimestres per visualitzar l'evolució")
-            else:
-                display_evolution_dashboard(all_trimesters, comments_manager=st.session_state.comments_manager)
+            st.write(f"📄 {uploaded_file.name}")
     
-    elif menu == "Actes CSV":
-        display_acta_viewer()
+    # Create trimester selector based on available trimesters
+    available_trimesters = []
+    for uploaded_file in uploaded_files:
+        if uploaded_file.name in file_info:
+            available_trimesters.append(uploaded_file.name)
     
-    elif menu == "Convertir CSV":
-        st.title("Convertir CSV")
-        csv_converter_main()
+    if not available_trimesters:
+        st.error("No s'han trobat fitxers vàlids per seleccionar")
+        return
+    
+    # Selector de trimestre
+    trimestre = st.selectbox(
+        "Selecciona el trimestre",
+        available_trimesters,
+        index=0,
+        key="trimester_selector",
+        format_func=lambda x: file_info[x]['display_name'] if x in file_info else x
+    )
+    
+    # Cargar estudiantes según el trimestre seleccionado
+    selected_file = next(f for f in uploaded_files if f.name == trimestre)
+    if file_type == "JSON":
+        students, _, _ = load_uploaded_json_files([selected_file])
+    else:
+        students, _, _ = load_uploaded_csv_acta_files([selected_file])
+    
+    # Create tabs for different views
+    tab1, tab2, tab3 = st.tabs(["Grup", "Materia", "Alumne"])
+    
+    # Add comments management to sidebar
+    render_comments_management_sidebar(st.session_state.comments_manager)
+    
+    with tab1:
+        col1, col2 = st.columns(2)
+        display_group_statistics(students, comments_manager=st.session_state.comments_manager)
+        group_failure_table(students)
+        display_subjects_failure_ranking(students)
+        display_subjects_bar_chart(students)
+        display_student_subject_heatmap(students)
+        display_student_ranking(students)
+    
+    with tab2:
+        # Display subject statistics
+        display_subject_statistics(students, comments_manager=st.session_state.comments_manager)
+    
+    with tab3:    
+        # Display student selector and get selected student data
+        selected_student_data = display_student_selector(students)
+        col1, col2 = st.columns(2)
+        with col1:
+            # Display student marks
+            display_student_marks(selected_student_data, comments_manager=st.session_state.comments_manager)
+        with col2:
+            # Display pie chart of marks
+            display_marks_pie_chart(selected_student_data)
 
 if __name__ == "__main__":
     main() 

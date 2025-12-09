@@ -483,16 +483,16 @@ def display_subjects_failure_ranking(students):
             yaxis={'categoryorder': 'total ascending'}  # Keeps the order we set
         )
         
-        col1, col2 = st.columns([1, 2])
-        with col1:
-            # Format column for display while keeping sorting numeric
-            st.dataframe(
-                df.style.format({'% Suspensos': '{:.1f}%'}),
-                hide_index=True,
-                height=max(400, len(ranking_data) * 35 + 38)
-            )
-        with col2:
-            st.plotly_chart(fig, config={'responsive': True}, key='failure_ranking_bar')
+        # col1, col2 = st.columns([1, 2])
+        # with col1:
+        #     # Format column for display while keeping sorting numeric
+        #     st.dataframe(
+        #         df.style.format({'% Suspensos': '{:.1f}%'}),
+        #         hide_index=True,
+        #         height=max(400, len(ranking_data) * 35 + 38)
+        #     )
+        # with col2:
+        st.plotly_chart(fig, config={'responsive': True}, key='failure_ranking_bar')
     else:
         st.info("Selecciona almenys un curs per veure el rànquing.")
 
