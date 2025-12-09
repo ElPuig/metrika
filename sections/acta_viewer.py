@@ -200,7 +200,7 @@ def display_global_view(data):
     df_rankings = pd.DataFrame(student_rankings)
     df_rankings = df_rankings.sort_values('Mitjana', ascending=False, key=lambda x: pd.to_numeric(x.replace('N/A', '0')))
     
-    st.dataframe(df_rankings, width='stretch', hide_index=True, height=400)
+    st.dataframe(df_rankings, hide_index=True, height=400)
 
 
 def display_subject_view(data):
@@ -303,7 +303,7 @@ def display_subject_view(data):
         df_details = pd.DataFrame(subject_details)
         df_details = df_details.sort_values('Alumne')
         
-        st.dataframe(df_details, width='stretch', hide_index=True, height=350)
+        st.dataframe(df_details, hide_index=True, height=350)
 
 
 def display_student_view(data):
@@ -425,7 +425,7 @@ def display_student_view(data):
         
         styled_df = df_subjects.style.apply(highlight_status, axis=1)
         
-        st.dataframe(styled_df, width='stretch', hide_index=True, height=330)
+        st.dataframe(styled_df, hide_index=True, height=330)
     
     # Comments section
     if selected_student.get('comentari_general', '').strip():

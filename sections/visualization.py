@@ -10,7 +10,7 @@ import time
 
 def show_classroom_table(data:pd.DataFrame, title:str):
     with st.expander(f"Tabla global clase ({title})"):
-        st.dataframe(data, width='stretch')
+        st.dataframe(data)
 
 
 def subject_visualization(data:pd.DataFrame, selected_subject:str, title:str):
@@ -175,8 +175,7 @@ def show_student_evolution(data1:pd.DataFrame, data2:pd.DataFrame, student_name:
     display_df["Trimestre 1"] = display_df["Trimestre 1"].apply(lambda x: MarkConfig.get_mark_from_height(x))
     display_df["Trimestre 2"] = display_df["Trimestre 2"].apply(lambda x: MarkConfig.get_mark_from_height(x))
     st.dataframe(
-        display_df.sort_values("Evolución", ascending=False),
-        width='stretch'
+        display_df.sort_values("Evolución", ascending=False)
     )
     
     # Mostrar resumen general
@@ -240,7 +239,7 @@ def display_marks_pie_chart(student_data):
 
     st.subheader("Distribució de Qualificacions")
     # display table with qualification counts
-    st.dataframe(pd.DataFrame(filtered_counts, index=[0]), width='stretch', hide_index=True)
+    st.dataframe(pd.DataFrame(filtered_counts, index=[0]), hide_index=True)
 
     # Display the chart in Streamlit
     st.plotly_chart(fig, config={'responsive': True})
@@ -568,7 +567,7 @@ def display_student_ranking(students):
             colors[i] = 'background-color: #ffb3b3; color: black'
         return colors
     styled_df = df.style.apply(highlight_top_bottom, subset=['Mitjana (0-10)'])
-    st.dataframe(styled_df, hide_index=True, width='stretch')
+    st.dataframe(styled_df, hide_index=True)
 
 
 def display_student_subject_heatmap(students):
@@ -782,8 +781,7 @@ def display_subject_statistics(students):
                     "Qualificació": st.column_config.TextColumn("Qualificació", width="small"),
                     "Comentari": st.column_config.TextColumn("Comentari", width="large")
                 },
-                hide_index=True,
-                width='stretch'
+                hide_index=True
             )
         else:
             st.info("No s'han trobat comentaris per aquesta assignatura.")

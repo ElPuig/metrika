@@ -290,6 +290,7 @@ def main():
             "Tipus de fitxer",
             ["JSON", "CSV (Actes)"],
             horizontal=True,
+            index=1,
             help="Selecciona el tipus de fitxer que vols carregar"
         )
         
