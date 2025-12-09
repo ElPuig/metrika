@@ -1,5 +1,7 @@
 from enum import Enum
 import pandas as pd
+import tomli
+from pathlib import Path
 
 # Constants classes
 class MathConstants(Enum):
@@ -109,17 +111,28 @@ class AppConfig:
     MAX_SIZE = 100
     MIN_SIZE = 10
 
-    # Application version (Semantic Versioning: MAJOR.MINOR.PATCH)
-    VERSION = "1.0.0"
+    # Application version - read from pyproject.toml
+    @staticmethod
+    def _get_version():
+        """Read version from pyproject.toml"""
+        try:
+            pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
+            with open(pyproject_path, "rb") as f:
+                pyproject = tomli.load(f)
+            return pyproject["project"]["version"]
+        except Exception:
+            return "0.1.0"  # Fallback version
+    
+    VERSION = _get_version.__func__()
     
     # Application name
     APP_NAME = "Metrika"
     
     # Version description
-    VERSION_DESCRIPTION = "Primera versió estable amb suport per a estructura JSON millorada"
+    VERSION_DESCRIPTION = "Versió inicial amb suport per a CSV d'actes i sistema de comentaris"
     
     # Minimum compatible version (for backward compatibility)
-    MIN_COMPATIBLE_VERSION = "1.0.0"
+    MIN_COMPATIBLE_VERSION = "0.1.0"
 
 
 class TestConfig(Enum):
