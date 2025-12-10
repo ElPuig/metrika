@@ -6,9 +6,31 @@ authors = [
     {name = "Dario Perez"}
 ]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12,<4"
 dependencies = [
+    "streamlit>=1.32.0",
+    "pandas>=2.2.1",
+    "numpy>=1.26.0",
+    "plotly>=5.19.0",
+    "reportlab>=4.1.0",
+    "pdfplumber>=0.10.0",
+    "tabula-py>=2.8.0",
+    "pdfminer.six>=20231228",
+    "tomli>=2.0.0",
 ]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4.3",
+    "pytest-mock>=3.12.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.1",
+    "pytest-html>=4.1.1",
+    "pytest-xdist>=3.3.1",
+]
+
+[project.scripts]
+metrika = "app:main"
 
 
 [build-system]

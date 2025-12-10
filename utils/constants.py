@@ -1,6 +1,9 @@
 from enum import Enum
 import pandas as pd
-import tomli
+try:
+    import tomllib  # Python 3.11+
+except ImportError:
+    import tomli as tomllib  # Fallback for older Python versions
 from pathlib import Path
 
 # Constants classes
@@ -118,7 +121,7 @@ class AppConfig:
         try:
             pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
             with open(pyproject_path, "rb") as f:
-                pyproject = tomli.load(f)
+                pyproject = tomllib.load(f)
             return pyproject["project"]["version"]
         except Exception:
             return "0.1.0"  # Fallback version
