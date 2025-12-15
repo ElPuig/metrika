@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from utils.comments_manager import render_comment_input, render_comment_display
+from sections.visualization import display_marks_pie_chart
 
 def display_student_marks(selected_student_data, comments_manager=None):
     """Display student marks in a filtered and sorted table"""
@@ -23,7 +24,7 @@ def display_student_marks(selected_student_data, comments_manager=None):
                 })
             
             df = pd.DataFrame(subjects_data)
-            df = df.sort_values('Materia')
+            df = df.sort_values('Qualificació')
             
             st.dataframe(
                 df,
@@ -35,6 +36,9 @@ def display_student_marks(selected_student_data, comments_manager=None):
                 hide_index=True,
                 height=400
             )
+            
+            # Display pie chart right after the notes table
+            display_marks_pie_chart(selected_student_data)
         else:
             st.info("No hi ha matèries de 4t per mostrar")
         

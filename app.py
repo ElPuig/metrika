@@ -199,13 +199,8 @@ def main():
     with tab3:    
         # Display student selector and get selected student data
         selected_student_data = display_student_selector(students)
-        col1, col2 = st.columns(2)
-        with col1:
-            # Display student marks
-            display_student_marks(selected_student_data, comments_manager=st.session_state.comments_manager)
-        with col2:
-            # Display pie chart of marks
-            display_marks_pie_chart(selected_student_data)
+        # Display student marks (includes pie chart)
+        display_student_marks(selected_student_data, comments_manager=st.session_state.comments_manager)
 
 if __name__ == "__main__":
     main() 
