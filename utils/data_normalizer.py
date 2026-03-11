@@ -20,6 +20,7 @@ def normalize_student_data(student):
         normalized = {
             'id': student['id'],
             'nom_cognoms': student['nom'],
+            'nivell': student.get('nivell', None),
             'grup': student.get('grup_codi', ''),
             'trimestre': student.get('trimestre', ''),
             'materies': [],

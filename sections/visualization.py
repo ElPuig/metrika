@@ -9,6 +9,23 @@ import plotly.graph_objects as go
 import time
 
 
+def _level_to_course_marker(level):
+    """Map level values from CSV (int/str/float) to course markers used in subject names."""
+    if level is None:
+        return '4t'
+
+    level_str = str(level).strip()
+    if level_str.endswith('.0'):
+        level_str = level_str[:-2]
+
+    return {
+        '1': '1r',
+        '2': '2n',
+        '3': '3r',
+        '4': '4t'
+    }.get(level_str, '4t')
+
+
 def show_classroom_table(data:pd.DataFrame, title:str):
     with st.expander(f"Tabla global clase ({title})"):
         st.dataframe(data)
@@ -407,14 +424,8 @@ def display_subjects_failure_ranking(students):
         # Get the level from first student to determine current level marker
         if students:
             first_student = students[0]
-            student_level = first_student.get('nivell', 4)  # Default to 4 if not found
-            level_to_marker = {
-                1: '1r',
-                2: '2n', 
-                3: '3r',
-                4: '4t'
-            }
-            current_marker = level_to_marker.get(student_level, '4t')
+            student_level = first_student.get('nivell', 4)
+            current_marker = _level_to_course_marker(student_level)
             selected_courses = [current_marker]
         else:
             selected_courses = ["4t"]  # Fallback
@@ -525,14 +536,8 @@ def display_subjects_bar_chart(students):
         # Get the level from first student to determine current level marker
         if students:
             first_student = students[0]
-            student_level = first_student.get('nivell', 4)  # Default to 4 if not found
-            level_to_marker = {
-                1: '1r',
-                2: '2n', 
-                3: '3r',
-                4: '4t'
-            }
-            current_marker = level_to_marker.get(student_level, '4t')
+            student_level = first_student.get('nivell', 4)
+            current_marker = _level_to_course_marker(student_level)
             selected_courses = [current_marker]
         else:
             selected_courses = ["4t"]  # Fallback
@@ -651,14 +656,8 @@ def display_student_subject_heatmap(students):
         # Get the level from first student to determine current level marker
         if students:
             first_student = students[0]
-            student_level = first_student.get('nivell', 4)  # Default to 4 if not found
-            level_to_marker = {
-                1: '1r',
-                2: '2n', 
-                3: '3r',
-                4: '4t'
-            }
-            current_marker = level_to_marker.get(student_level, '4t')
+            student_level = first_student.get('nivell', 4)
+            current_marker = _level_to_course_marker(student_level)
             selected_courses = [current_marker]
         else:
             selected_courses = ["4t"]  # Fallback
@@ -766,14 +765,8 @@ def display_subject_statistics(students, comments_manager=None):
         # Get the level from first student to determine current level marker
         if students:
             first_student = students[0]
-            student_level = first_student.get('nivell', 4)  # Default to 4 if not found
-            level_to_marker = {
-                1: '1r',
-                2: '2n', 
-                3: '3r',
-                4: '4t'
-            }
-            current_marker = level_to_marker.get(student_level, '4t')
+            student_level = first_student.get('nivell', 4)
+            current_marker = _level_to_course_marker(student_level)
             selected_courses = [current_marker]
         else:
             selected_courses = ["4t"]  # Fallback

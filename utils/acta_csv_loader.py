@@ -64,6 +64,7 @@ def parse_acta_csv(file_path: str) -> List[Dict[str, Any]]:
         student = {
             'id': str(row['id']),
             'nom': row['nom_cognoms'],
+            'nivell': row.get('nivell', None),
             'grup_codi': row['grup_codi'],
             'numero_avaluacio': row['numero_avaluacio'],
             'codi_ensenyament': row['codi_ensenyament'],
@@ -161,6 +162,7 @@ def parse_uploaded_acta_csv(uploaded_file) -> List[Dict[str, Any]]:
         student = {
             'id': str(row['id']),
             'nom': row['nom_cognoms'],
+            'nivell': row.get('nivell', None),
             'grup_codi': row['grup_codi'],
             'numero_avaluacio': row['numero_avaluacio'],
             'codi_ensenyament': row['codi_ensenyament'],
