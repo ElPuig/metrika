@@ -144,3 +144,7 @@ frontend/cypress/snapshots/linux/1x
 # vscode and cursor files
 .vscode/
 
+# Ignore comments files
+/comments_data.json
+/comments/*.json
+!comments/.gitkeep
