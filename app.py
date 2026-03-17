@@ -18,7 +18,12 @@ from sections.visualization import (
 from sections.evolution import display_evolution_dashboard
 from sections.acta_viewer import display_acta_viewer
 from utils.constants import MarkConfig, AppConfig
-from utils.acta_csv_loader import parse_uploaded_acta_csv, get_acta_csv_info
+from utils.acta_csv_loader import (
+    parse_uploaded_acta_csv,
+    get_acta_csv_info,
+    build_term_export_dataframe,
+    get_current_course_subject_enrollment
+)
 from utils.comments_manager import CommentsManager, get_session_id, render_comments_management_sidebar
 import plotly.graph_objects as go
 import pandas as pd
@@ -167,6 +172,73 @@ def _apply_selected_trimester_labels(all_students, file_info):
             student.get('file_display_name', '')
         )
 
+
+def _sanitize_filename_fragment(value):
+    """Return a filesystem-friendly filename fragment."""
+    sanitized = re.sub(r'[^A-Za-z0-9]+', '_', str(value or '')).strip('_')
+    return sanitized or 'sense_valor'
+
+
+def _build_term_export_filename(group_name, trimester_label):
+    """Build a deterministic filename for term exports."""
+    group_slug = _sanitize_filename_fragment(group_name)
+    trimester_slug = _sanitize_filename_fragment(trimester_label)
+    return f"metrika_{group_slug}_{trimester_slug}_term_export.csv"
+
+
+def _render_term_export_tab(students, file_info, selected_file):
+    """Render a CSV export tab for the currently selected trimester."""
+    st.subheader("Exportació del trimestre seleccionat")
+
+    export_df = build_term_export_dataframe(students)
+    if export_df.empty:
+        st.info("No hi ha dades de matèries del curs actual per exportar")
+        return
+
+    selected_info = file_info.get(selected_file, {})
+    selected_group = selected_info.get('grup', students[0].get('grup', 'Sense grup'))
+    selected_trimester = selected_info.get('trimestre', students[0].get('trimestre', 'Sense trimestre'))
+
+    subject_enrollment = get_current_course_subject_enrollment(students)
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Alumnes", len(export_df))
+    with col2:
+        st.metric("Matèries", len(subject_enrollment))
+    with col3:
+        st.metric("Columnes totals", len(export_df.columns))
+
+    st.caption(
+        "Les matèries s'ordenen per nombre d'alumnes matriculats (de més a menys). "
+        "Cada matèria té 2 columnes: Qualificació i Comentari."
+    )
+
+    if subject_enrollment:
+        subject_enrollment_df = pd.DataFrame(subject_enrollment).rename(
+            columns={'subject': 'Matèria', 'student_count': 'Alumnes'}
+        )
+        st.dataframe(
+            subject_enrollment_df,
+            hide_index=True,
+            use_container_width=True,
+            height=min(360, 48 + len(subject_enrollment_df) * 35)
+        )
+
+    csv_data = export_df.to_csv(index=False).encode('utf-8-sig')
+    file_name = _build_term_export_filename(selected_group, selected_trimester)
+
+    st.download_button(
+        label="📥 Descarregar CSV del trimestre",
+        data=csv_data,
+        file_name=file_name,
+        mime="text/csv",
+        key=f"download_term_export_{selected_file}"
+    )
+
+    st.caption("Vista prèvia de l'export (primeres 30 files):")
+    st.dataframe(export_df.head(30), use_container_width=True, hide_index=True)
+
 def main():
     st.set_page_config(
         page_title=f"{AppConfig.APP_NAME} - Sistema de Visualització de Notes",
@@ -284,7 +356,7 @@ def main():
         return
     
     # Create tabs for different views
-    tab1, tab2, tab3, tab4 = st.tabs(["Grup", "Materia", "Alumne", "Comparador"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Grup", "Materia", "Alumne", "Comparador", "Exportació"])
     
     # Add comments management to sidebar
     render_comments_management_sidebar(st.session_state.comments_manager)
@@ -310,6 +382,9 @@ def main():
 
     with tab4:
         display_evolution_dashboard(all_students, comments_manager=st.session_state.comments_manager)
+
+    with tab5:
+        _render_term_export_tab(students, file_info, trimestre)
 
 if __name__ == "__main__":
     main() 

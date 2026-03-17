@@ -236,3 +236,127 @@ def get_acta_csv_info(file_path: str) -> Dict[str, Any]:
         'trimestre': f"T{row.get('numero_avaluacio', 'X')}",
         'nom_ensenyament': row.get('nom_ensenyament', 'Unknown')
     }
+
+
+def _normalize_subject_name(subject_name: Any) -> str:
+    """Return a normalized subject name suitable for stable grouping."""
+    if pd.isna(subject_name):
+        return ''
+
+    return ' '.join(str(subject_name).split())
+
+
+def _get_current_course_subjects(student: Dict[str, Any]) -> List[Dict[str, str]]:
+    """Return current-course subjects in a unified dictionary format."""
+    # CSV parser output: current-course subjects are already filtered into `subjects`.
+    if 'subjects' in student:
+        subjects = []
+        for subject in student.get('subjects', []):
+            subject_name = _normalize_subject_name(subject.get('subject', ''))
+            if not subject_name:
+                continue
+
+            subjects.append({
+                'subject': subject_name,
+                'qualification': str(subject.get('qualification', '')).strip(),
+                'comment': str(subject.get('comment', '')).strip()
+            })
+        return subjects
+
+    # Fallback for normalized JSON-like objects.
+    subjects = []
+    for materia in student.get('materies', []):
+        subject_name = _normalize_subject_name(materia.get('materia', ''))
+        if not subject_name:
+            continue
+
+        subjects.append({
+            'subject': subject_name,
+            'qualification': str(materia.get('qualificacio', '')).strip(),
+            'comment': str(materia.get('comentari', '')).strip()
+        })
+
+    return subjects
+
+
+def get_current_course_subject_enrollment(students: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Return subjects sorted by enrolled-student count (desc) then by subject name."""
+    subject_student_ids: Dict[str, set] = {}
+
+    for student in students:
+        student_id = str(student.get('id', '')).strip()
+        seen_subjects = set()
+
+        for subject in _get_current_course_subjects(student):
+            subject_name = subject['subject']
+            if subject_name in seen_subjects:
+                continue
+
+            seen_subjects.add(subject_name)
+            subject_student_ids.setdefault(subject_name, set()).add(student_id)
+
+    sorted_subjects = sorted(
+        subject_student_ids.keys(),
+        key=lambda subject_name: (
+            -len(subject_student_ids[subject_name]),
+            subject_name.lower()
+        )
+    )
+
+    return [
+        {
+            'subject': subject_name,
+            'student_count': len(subject_student_ids[subject_name])
+        }
+        for subject_name in sorted_subjects
+    ]
+
+
+def build_term_export_dataframe(students: List[Dict[str, Any]]) -> pd.DataFrame:
+    """
+    Build a wide export table for one term:
+    - one row per student
+    - one subject block per subject (qualification + comment)
+    - subjects ordered by enrolled student count (desc)
+    """
+    base_columns = ['Nom complet', 'ID alumne', 'Grup']
+    if not students:
+        return pd.DataFrame(columns=base_columns)
+
+    ordered_subjects = get_current_course_subject_enrollment(students)
+
+    export_columns = list(base_columns)
+    for subject_info in ordered_subjects:
+        subject_name = subject_info['subject']
+        export_columns.append(f"{subject_name} - Qualificació")
+        export_columns.append(f"{subject_name} - Comentari")
+
+    export_rows = []
+    for student in students:
+        row = {
+            'Nom complet': str(student.get('nom', student.get('nom_cognoms', ''))).strip(),
+            'ID alumne': str(student.get('id', '')).strip(),
+            'Grup': str(student.get('grup', student.get('grup_codi', ''))).strip()
+        }
+
+        student_subject_map: Dict[str, Dict[str, str]] = {}
+        for subject in _get_current_course_subjects(student):
+            subject_name = subject['subject']
+            existing = student_subject_map.get(subject_name, {'qualification': '', 'comment': ''})
+
+            if subject['qualification'] and not existing['qualification']:
+                existing['qualification'] = subject['qualification']
+            if subject['comment'] and not existing['comment']:
+                existing['comment'] = subject['comment']
+
+            student_subject_map[subject_name] = existing
+
+        for subject_info in ordered_subjects:
+            subject_name = subject_info['subject']
+            value = student_subject_map.get(subject_name, {'qualification': '', 'comment': ''})
+            row[f"{subject_name} - Qualificació"] = value['qualification']
+            row[f"{subject_name} - Comentari"] = value['comment']
+
+        export_rows.append(row)
+
+    return pd.DataFrame(export_rows, columns=export_columns)

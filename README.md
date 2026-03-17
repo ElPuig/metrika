@@ -34,6 +34,7 @@ Metrika ofereix tres modes principals de treball:
 - **Classificació automàtica de matèries**: Separa matèries actuals (4t) de pendents (1r, 2n, 3r)
 - **Vista de matèries pendents**: Taula separada per a matèries de cursos anteriors (només visible a vista alumne)
 - **Normalització transparent**: Funciona amb ambdós formats sense conversió manual
+- **Exportació CSV del trimestre seleccionat**: Una fila per alumne i dues columnes per matèria (qualificació/comentari), amb ordenació per nombre d'alumnes
 - Visualització directa d'actes CSV exportades d'Esfera (ESO i CF)
 - Suport per a qualificacions: "No assoliment", "Assoliment satisfactori", "Assoliment notable", "Assoliment excel·lent"
 - Suport per a CF: "Assolit-X", "No assolit", "Convalidat", "Pendent"
@@ -51,7 +52,6 @@ Metrika ofereix tres modes principals de treball:
 - Generació de dades aleatòries per a proves i simulacions
 
 ### No implementades
-- Exportació de dades a altres formats
 - Integració amb sistemes externs
 - Gestió d'usuaris i permisos
 - Adaptació específica per Batxillerat (es pot utilitzar la funcionalitat actual)
@@ -150,7 +150,7 @@ streamlit run app.py
 - **Classificació automàtica**:
   - Matèries de 4t: Comptabilitzades a l'estadística global
   - Matèries pendents (1r, 2n, 3r): Mostrades separadament, NO comptabilitzades
-- **4 vistes principals**:
+- **5 vistes principals**:
   1. **Vista Grup**: Estadístiques globals, distribució de qualificacions, resum de suspensos, gràfic de barres per assignatura, mapa de calor, rànquing d'alumnes
   2. **Vista Materia**: Estadístiques específiques, distribució, llista d'alumnes amb notes i comentaris
   3. **Vista Alumne**: 
@@ -159,6 +159,11 @@ streamlit run app.py
      - Comentari General
      - Taxa d'èxit i mitjana
   4. **Vista Evolució**: Comparació entre avaluacions, gràfics d'evolució
+  5. **Vista Exportació**:
+     - Exporta el trimestre seleccionat a CSV
+     - Una fila per alumne
+     - Dues columnes per matèria: qualificació i comentari
+     - Matèries ordenades per nombre d'alumnes (de més a menys), deixant normalment les optatives al final
 
 ### Visualització d'Actes CSV (CF)
 - Càrrega directa de fitxers CSV d'actes exportats d'Esfera

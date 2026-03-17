@@ -6,6 +6,10 @@ from utils.acta_loader import (
     calculate_subject_statistics,
     get_student_summary
 )
+from utils.acta_csv_loader import (
+    build_term_export_dataframe,
+    get_current_course_subject_enrollment
+)
 import tempfile
 import os
 
@@ -154,6 +158,112 @@ def test_load_acta_csv_basic():
         
     finally:
         os.unlink(tmp_path)
+
+
+def test_term_export_subject_order_and_column_pairs():
+    """Subjects must be sorted by enrollment and represented with qual/comment columns."""
+    students = [
+        {
+            'id': '1',
+            'nom': 'Alumne 1',
+            'grup': '4A',
+            'subjects': [
+                {'subject': 'Matematiques 4t', 'qualification': 'AN', 'comment': 'Molt be'},
+                {'subject': 'Optativa Robotica 4t', 'qualification': 'AS', 'comment': 'Participa'}
+            ]
+        },
+        {
+            'id': '2',
+            'nom': 'Alumne 2',
+            'grup': '4A',
+            'subjects': [
+                {'subject': 'Matematiques 4t', 'qualification': 'AE', 'comment': 'Excel lent'},
+                {'subject': 'Catala 4t', 'qualification': 'AN', 'comment': 'Correcte'}
+            ]
+        },
+        {
+            'id': '3',
+            'nom': 'Alumne 3',
+            'grup': '4A',
+            'subjects': [
+                {'subject': 'Matematiques 4t', 'qualification': 'AS', 'comment': 'Pot millorar'}
+            ]
+        }
+    ]
+
+    enrollment = get_current_course_subject_enrollment(students)
+    assert [item['subject'] for item in enrollment] == [
+        'Matematiques 4t',
+        'Catala 4t',
+        'Optativa Robotica 4t'
+    ]
+    assert [item['student_count'] for item in enrollment] == [3, 1, 1]
+
+    df = build_term_export_dataframe(students)
+    assert list(df.columns) == [
+        'Nom complet',
+        'ID alumne',
+        'Grup',
+        'Matematiques 4t - Qualificació',
+        'Matematiques 4t - Comentari',
+        'Catala 4t - Qualificació',
+        'Catala 4t - Comentari',
+        'Optativa Robotica 4t - Qualificació',
+        'Optativa Robotica 4t - Comentari'
+    ]
+
+
+def test_term_export_leaves_empty_cells_for_non_enrolled_subjects():
+    """Non-enrolled students must keep empty cells for that subject pair."""
+    students = [
+        {
+            'id': '1',
+            'nom': 'Alumne 1',
+            'grup': '4A',
+            'subjects': [
+                {'subject': 'Matematiques 4t', 'qualification': 'AN', 'comment': 'Molt be'},
+                {'subject': 'Catala 4t', 'qualification': 'AS', 'comment': 'Progressa'}
+            ]
+        },
+        {
+            'id': '2',
+            'nom': 'Alumne 2',
+            'grup': '4A',
+            'subjects': [
+                {'subject': 'Matematiques 4t', 'qualification': 'AE', 'comment': 'Excel lent'}
+            ]
+        }
+    ]
+
+    df = build_term_export_dataframe(students)
+    row_alumne_2 = df[df['ID alumne'] == '2'].iloc[0]
+
+    assert row_alumne_2['Matematiques 4t - Qualificació'] == 'AE'
+    assert row_alumne_2['Catala 4t - Qualificació'] == ''
+    assert row_alumne_2['Catala 4t - Comentari'] == ''
+
+
+def test_term_export_ignores_pending_subjects_and_uses_current_course_data():
+    """Only `subjects` (current course) must be exported, not `pending_subjects`."""
+    students = [
+        {
+            'id': '1',
+            'nom': 'Alumne 1',
+            'grup': '4A',
+            'subjects': [
+                {'subject': 'Matematiques 4t', 'qualification': 'AN', 'comment': 'Molt be'}
+            ],
+            'pending_subjects': [
+                {'subject': 'Biologia 3r', 'qualification': 'NA', 'comment': 'Pendent'}
+            ]
+        }
+    ]
+
+    df = build_term_export_dataframe(students)
+
+    assert 'Matematiques 4t - Qualificació' in df.columns
+    assert 'Biologia 3r - Qualificació' not in df.columns
+    assert len(df) == 1
 
 
 if __name__ == '__main__':
