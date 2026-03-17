@@ -266,5 +266,38 @@ def test_term_export_ignores_pending_subjects_and_uses_current_course_data():
     assert len(df) == 1
 
 
+def test_term_export_empty_qualification_treated_as_not_enrolled():
+    """Rows with empty qualification should not count as enrolled for that subject."""
+    students = [
+        {
+            'id': '1',
+            'nom': 'Alumne 1',
+            'grup': '4A',
+            'subjects': [
+                {'subject': 'Matematiques 4t', 'qualification': 'AN', 'comment': 'Molt be'},
+                {'subject': 'Optativa Robotica 4t', 'qualification': '', 'comment': ''}
+            ]
+        },
+        {
+            'id': '2',
+            'nom': 'Alumne 2',
+            'grup': '4A',
+            'subjects': [
+                {'subject': 'Matematiques 4t', 'qualification': 'AS', 'comment': 'Progressa'},
+                {'subject': 'Optativa Robotica 4t', 'qualification': 'AE', 'comment': 'Molt be'}
+            ]
+        }
+    ]
+
+    enrollment = get_current_course_subject_enrollment(students)
+    assert [item['subject'] for item in enrollment] == ['Matematiques 4t', 'Optativa Robotica 4t']
+    assert [item['student_count'] for item in enrollment] == [2, 1]
+
+    df = build_term_export_dataframe(students)
+    row_alumne_1 = df[df['ID alumne'] == '1'].iloc[0]
+    assert row_alumne_1['Optativa Robotica 4t - Qualificació'] == ''
+    assert row_alumne_1['Optativa Robotica 4t - Comentari'] == ''
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

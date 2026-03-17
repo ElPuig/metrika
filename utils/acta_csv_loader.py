@@ -253,12 +253,17 @@ def _get_current_course_subjects(student: Dict[str, Any]) -> List[Dict[str, str]
         subjects = []
         for subject in student.get('subjects', []):
             subject_name = _normalize_subject_name(subject.get('subject', ''))
+            qualification = str(subject.get('qualification', '')).strip()
             if not subject_name:
+                continue
+
+            # Export rule: empty qualification means not enrolled in that subject.
+            if not qualification:
                 continue
 
             subjects.append({
                 'subject': subject_name,
-                'qualification': str(subject.get('qualification', '')).strip(),
+                'qualification': qualification,
                 'comment': str(subject.get('comment', '')).strip()
             })
         return subjects
@@ -267,12 +272,17 @@ def _get_current_course_subjects(student: Dict[str, Any]) -> List[Dict[str, str]
     subjects = []
     for materia in student.get('materies', []):
         subject_name = _normalize_subject_name(materia.get('materia', ''))
+        qualification = str(materia.get('qualificacio', '')).strip()
         if not subject_name:
+            continue
+
+        # Export rule: empty qualification means not enrolled in that subject.
+        if not qualification:
             continue
 
         subjects.append({
             'subject': subject_name,
-            'qualification': str(materia.get('qualificacio', '')).strip(),
+            'qualification': qualification,
             'comment': str(materia.get('comentari', '')).strip()
         })
 
