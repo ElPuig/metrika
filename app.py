@@ -250,6 +250,8 @@ def main():
     # Initialize comments manager
     if 'comments_manager' not in st.session_state:
         st.session_state.comments_manager = CommentsManager()
+        # Try to restore the last imported file
+        st.session_state.comments_manager.restore_last_imported_file()
     
     # Sidebar with version information
     with st.sidebar:
@@ -368,7 +370,7 @@ def main():
         display_subjects_failure_ranking(students)
         display_subjects_bar_chart(students)
         display_student_subject_heatmap(students)
-        display_student_ranking(students)
+        display_student_ranking(students, comments_manager=st.session_state.comments_manager)
     
     with tab2:
         # Display subject statistics
@@ -376,7 +378,7 @@ def main():
     
     with tab3:    
         # Display student selector and get selected student data
-        selected_student_data = display_student_selector(students)
+        selected_student_data = display_student_selector(students, comments_manager=st.session_state.comments_manager)
         # Display student marks (includes pie chart)
         display_student_marks(selected_student_data, comments_manager=st.session_state.comments_manager)
 

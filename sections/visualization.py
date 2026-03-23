@@ -578,7 +578,7 @@ def display_subjects_bar_chart(students):
         st.info("Selecciona almenys un curs per veure el gràfic.")
 
 
-def display_student_ranking(students):
+def display_student_ranking(students, comments_manager=None):
     st.subheader("Ranking d'alumnes per mitjana numèrica (NA=2.5, AS=5, AN=7.5, AE=10)")
     
     # Normalize all students
@@ -602,8 +602,12 @@ def display_student_ranking(students):
             avg_10 = float(f"{avg:.2g}")
         else:
             avg_10 = "N/A"
+        
+        # Add adaptation badge if applicable
+        adaptation_badge = "🎯 Adaptació" if comments_manager and comments_manager.get_student_adaptation(student['id']) else ""
+        
         ranking.append({
-            "Alumne": student['nom_cognoms'],
+            "Alumne": f"{student['nom_cognoms']} {adaptation_badge}".strip(),
             "Mitjana (0-10)": avg_10
         })
     # Ordenar de mayor a menor media

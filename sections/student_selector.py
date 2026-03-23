@@ -1,7 +1,8 @@
 import streamlit as st
 from utils.data_normalizer import normalize_student_data
+from utils.comments_manager import render_student_adaptation_toggle, render_adaptation_badge
 
-def display_student_selector(students):
+def display_student_selector(students, comments_manager=None):
     """Display the student selector dropdown and return the selected student data"""
     # Create a list of student names for the dropdown
     student_names = [f"{student.get('nom_cognoms', student.get('nom', 'Unknown'))} ({student['id']})" for student in students]
@@ -20,6 +21,17 @@ def display_student_selector(students):
     # Normalize the student data but keep original for display
     original_data = selected_student_data.copy()
     normalized_data = normalize_student_data(selected_student_data)
+    
+    # Display adaptation toggle if comments manager is available
+    if comments_manager:
+        st.markdown("---")
+        render_student_adaptation_toggle(
+            comments_manager,
+            student_id,
+            student_name=selected_student_data.get('nom_cognoms', selected_student_data.get('nom', 'Unknown')),
+            key_suffix="selector"
+        )
+        st.markdown("---")
     
     # Calculate average grade
     mark_to_value = {
