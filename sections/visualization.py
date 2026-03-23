@@ -303,6 +303,68 @@ def display_group_statistics(students, comments_manager=None):
     st.subheader("Distribució de qualificacions per trimestre")
     # Display the chart in Streamlit
     st.plotly_chart(fig, config={'responsive': True}, key='group_statistics_pie')
+
+    # Approved vs not approved (AS/AN/AE grouped as approved), including adaptation counts.
+    approved_students = 0
+    not_approved_students = 0
+    approved_with_adaptation = 0
+    not_approved_with_adaptation = 0
+
+    for student in students:
+        has_na = any(m.get('qualificacio') == MarkConfig.NA.value for m in student.get('materies', []))
+        student_id = str(student.get('id', ''))
+        has_adaptation = bool(
+            comments_manager and (
+                comments_manager.get_student_adaptation(student_id)
+                or comments_manager.get_student_adaptation(student.get('id', ''))
+            )
+        )
+
+        if has_na:
+            not_approved_students += 1
+            if has_adaptation:
+                not_approved_with_adaptation += 1
+        else:
+            approved_students += 1
+            if has_adaptation:
+                approved_with_adaptation += 1
+
+    total_students = len(students)
+    approved_pct = (approved_students / total_students * 100) if total_students else 0
+    not_approved_pct = (not_approved_students / total_students * 100) if total_students else 0
+    total_with_adaptation = approved_with_adaptation + not_approved_with_adaptation
+
+    st.subheader("Aprovats i no aprovats (inclou adaptacions)")
+    st.metric("Aprovats", approved_students)
+    st.metric("No aprovats", not_approved_students)
+    st.metric("Alumnes amb adaptació", total_with_adaptation)
+
+    summary_df = pd.DataFrame([
+        {
+            "Categoria": "Aprovats",
+            "Nº d'alumnes": approved_students,
+            "%": f"{approved_pct:.1f}%",
+            "Amb adaptació": approved_with_adaptation
+        },
+        {
+            "Categoria": "No aprovats",
+            "Nº d'alumnes": not_approved_students,
+            "%": f"{not_approved_pct:.1f}%",
+            "Amb adaptació": not_approved_with_adaptation
+        }
+    ])
+    st.dataframe(summary_df, hide_index=True, use_container_width=True)
+
+    fig_approved = go.Figure(data=[go.Pie(
+        labels=["Aprovats", "No aprovats"],
+        values=[approved_students, not_approved_students],
+        hole=.3,
+        textinfo='label+percent+value',
+        insidetextorientation='radial',
+        marker_colors=["#2ca02c", "#d62728"]
+    )])
+    fig_approved.update_layout(showlegend=False, height=400)
+    st.plotly_chart(fig_approved, config={'responsive': True}, key='group_approved_vs_not_approved_pie')
     
     # Add group comments functionality if available
     if comments_manager and students:
