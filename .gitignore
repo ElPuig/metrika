@@ -148,3 +148,4 @@ frontend/cypress/snapshots/linux/1x
 /comments_data.json
 /comments/*.json
 !comments/.gitkeep
+/imported_comments
