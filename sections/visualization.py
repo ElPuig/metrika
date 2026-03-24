@@ -304,68 +304,6 @@ def display_group_statistics(students, comments_manager=None):
     # Display the chart in Streamlit
     st.plotly_chart(fig, config={'responsive': True}, key='group_statistics_pie')
 
-    # Approved vs not approved (AS/AN/AE grouped as approved), including adaptation counts.
-    approved_students = 0
-    not_approved_students = 0
-    approved_with_adaptation = 0
-    not_approved_with_adaptation = 0
-
-    for student in students:
-        has_na = any(m.get('qualificacio') == MarkConfig.NA.value for m in student.get('materies', []))
-        student_id = str(student.get('id', ''))
-        has_adaptation = bool(
-            comments_manager and (
-                comments_manager.get_student_adaptation(student_id)
-                or comments_manager.get_student_adaptation(student.get('id', ''))
-            )
-        )
-
-        if has_na:
-            not_approved_students += 1
-            if has_adaptation:
-                not_approved_with_adaptation += 1
-        else:
-            approved_students += 1
-            if has_adaptation:
-                approved_with_adaptation += 1
-
-    total_students = len(students)
-    approved_pct = (approved_students / total_students * 100) if total_students else 0
-    not_approved_pct = (not_approved_students / total_students * 100) if total_students else 0
-    total_with_adaptation = approved_with_adaptation + not_approved_with_adaptation
-
-    st.subheader("Aprovats i no aprovats (inclou adaptacions)")
-    st.metric("Aprovats", approved_students)
-    st.metric("No aprovats", not_approved_students)
-    st.metric("Alumnes amb adaptació", total_with_adaptation)
-
-    summary_df = pd.DataFrame([
-        {
-            "Categoria": "Aprovats",
-            "Nº d'alumnes": approved_students,
-            "%": f"{approved_pct:.1f}%",
-            "Amb adaptació": approved_with_adaptation
-        },
-        {
-            "Categoria": "No aprovats",
-            "Nº d'alumnes": not_approved_students,
-            "%": f"{not_approved_pct:.1f}%",
-            "Amb adaptació": not_approved_with_adaptation
-        }
-    ])
-    st.dataframe(summary_df, hide_index=True, use_container_width=True)
-
-    fig_approved = go.Figure(data=[go.Pie(
-        labels=["Aprovats", "No aprovats"],
-        values=[approved_students, not_approved_students],
-        hole=.3,
-        textinfo='label+percent+value',
-        insidetextorientation='radial',
-        marker_colors=["#2ca02c", "#d62728"]
-    )])
-    fig_approved.update_layout(showlegend=False, height=400)
-    st.plotly_chart(fig_approved, config={'responsive': True}, key='group_approved_vs_not_approved_pie')
-    
     # Add group comments functionality if available
     if comments_manager and students:
         # Get group code from first student
@@ -865,8 +803,12 @@ def display_subject_statistics(students, comments_manager=None):
         MarkConfig.AE.value: 0
     }
     
-    # Collect comments
+    # Collect comments and per-subject pass/fail counters.
     comments_data = []
+    approved_students = 0
+    not_approved_students = 0
+    approved_with_adaptation = 0
+    not_approved_with_adaptation = 0
     
     for student in students:
         for materia in student['materies']:
@@ -874,11 +816,30 @@ def display_subject_statistics(students, comments_manager=None):
                 mark = materia['qualificacio']
                 if mark in mark_counts:
                     mark_counts[mark] += 1
+
+                student_id = str(student.get('id', ''))
+                has_adaptation = bool(
+                    comments_manager and (
+                        comments_manager.get_student_adaptation(student_id)
+                        or comments_manager.get_student_adaptation(student.get('id', ''))
+                    )
+                )
+
+                if mark == MarkConfig.NA.value:
+                    not_approved_students += 1
+                    if has_adaptation:
+                        not_approved_with_adaptation += 1
+                else:
+                    approved_students += 1
+                    if has_adaptation:
+                        approved_with_adaptation += 1
+
                 comments_data.append({
                     'Alumne': student['nom_cognoms'],
                     'Qualificació': mark,
                     'Comentari': materia['comentari']
                 })
+                break
     
     # Filter out marks with zero count
     filtered_counts = {k: v for k, v in mark_counts.items() if v > 0}
@@ -919,6 +880,47 @@ def display_subject_statistics(students, comments_manager=None):
             )
         else:
             st.info("No s'han trobat comentaris per aquesta assignatura.")
+
+    total_students = approved_students + not_approved_students
+    approved_pct = (approved_students / total_students * 100) if total_students else 0
+    not_approved_pct = (not_approved_students / total_students * 100) if total_students else 0
+    total_with_adaptation = approved_with_adaptation + not_approved_with_adaptation
+
+    st.subheader("Aprovats i no aprovats de l'assignatura (inclou adaptacions)")
+    metric_col1, metric_col2, metric_col3 = st.columns(3)
+    with metric_col1:
+        st.metric("Aprovats", approved_students)
+    with metric_col2:
+        st.metric("No aprovats", not_approved_students)
+    with metric_col3:
+        st.metric("Alumnes amb adaptació", total_with_adaptation)
+
+    summary_df = pd.DataFrame([
+        {
+            "Categoria": "Aprovats",
+            "Nº d'alumnes": approved_students,
+            "%": f"{approved_pct:.1f}%",
+            "Amb adaptació": approved_with_adaptation
+        },
+        {
+            "Categoria": "No aprovats",
+            "Nº d'alumnes": not_approved_students,
+            "%": f"{not_approved_pct:.1f}%",
+            "Amb adaptació": not_approved_with_adaptation
+        }
+    ])
+    st.dataframe(summary_df, hide_index=True, use_container_width=True)
+
+    fig_approved = go.Figure(data=[go.Pie(
+        labels=["Aprovats", "No aprovats"],
+        values=[approved_students, not_approved_students],
+        hole=.3,
+        textinfo='label+percent+value',
+        insidetextorientation='radial',
+        marker_colors=["#2ca02c", "#d62728"]
+    )])
+    fig_approved.update_layout(showlegend=False, height=400)
+    st.plotly_chart(fig_approved, config={'responsive': True}, key='subject_approved_vs_not_approved_pie')
     
     # Add subject comments functionality if available
     if comments_manager and selected_subject:
