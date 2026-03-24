@@ -101,6 +101,14 @@ def main() -> int:
         except PlaywrightTimeoutError as exc:
             print(f"Timeout while interacting with Streamlit app: {exc}")
             return 1
+        except Exception as exc:
+            error_text = str(exc)
+            if "Executable doesn't exist" in error_text:
+                print("No s'ha trobat el navegador de Playwright.")
+                print("Executa: python -m playwright install chromium")
+            else:
+                print(f"Error inesperat: {error_text}")
+            return 1
         finally:
             context.close()
             browser.close()
