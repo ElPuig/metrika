@@ -1,0 +1,33 @@
+:root {
+  --md-primary-fg-color: #1f4f7a;
+  --md-primary-fg-color--light: #3b6a94;
+  --md-accent-fg-color: #ea6a24;
+}
+
+.md-typeset h1 {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.md-typeset h2 {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  padding-bottom: 0.25rem;
+}
+
+.md-typeset .admonition,
+.md-typeset details {
+  border-radius: 10px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(31, 79, 122, 0.35);
+  background: rgba(31, 79, 122, 0.08);
+}
+
+.quick-links a {
+  font-weight: 600;
+}

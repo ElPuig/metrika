@@ -4,13 +4,10 @@ Una aplicació web basada en Streamlit per analitzar i visualitzar dades del ren
 
 ## Com funciona
 
-Metrika ofereix tres modes principals de treball:
+Metrika treballa amb un únic flux principal:
 
-1. **Estadístiques** (Visualització i Anàlisi)
-   - Carrega fitxers JSON o CSV d'actes exportats d'Esfera
-   - Suporta dos tipus de fitxers:
-     - **JSON**: Format tradicional amb dades de trimestres
-     - **CSV (Actes)**: Fitxers d'actes amb estructura m/q/c (matèria/qualificació/comentari)
+1. **Anàlisi d'actes CSV (ESO)**
+   - Carrega fitxers CSV d'actes exportats d'Esfera
    - Visualitza estadístiques globals, per matèria i per alumne
    - Analitza fins a 100 matèries per alumne
    - **Classificació automàtica de matèries:**
@@ -18,26 +15,16 @@ Metrika ofereix tres modes principals de treball:
      - Matèries pendents (1r, 2n, 3r): Es mostren separadament, NO es compten a l'estadística global
    - Suporta qualificacions: "No assoliment", "Assoliment satisfactori", "Assoliment notable", "Assoliment excel·lent"
 
-2. **Actes CSV (CF)** (Visualització directa de Cicles Formatius)
-   - Carrega directament fitxers d'actes CSV de Cicles Formatius
-   - Suporta qualificacions en format "Assolit-X", "No assolit", "Convalidat" i "Pendent"
-   - Vista específica per a Cicles Formatius
-
-3. **Convertir CSV**
-   - Converteix fitxers CSV a format JSON
-   - Manté l'històric per a comparacions entre trimestres
-
 ## Característiques
 
 ### Implementades
-- **Suport dual JSON/CSV**: Carrega tant fitxers JSON com CSV d'actes ESO
+- **Suport CSV d'actes (ESO)**: Carrega fitxers CSV d'actes
 - **Classificació automàtica de matèries**: Separa matèries actuals (4t) de pendents (1r, 2n, 3r)
 - **Vista de matèries pendents**: Taula separada per a matèries de cursos anteriors (només visible a vista alumne)
-- **Normalització transparent**: Funciona amb ambdós formats sense conversió manual
+- **Normalització transparent**: Processament automàtic de CSV d'actes
 - **Exportació CSV del trimestre seleccionat**: Una fila per alumne i dues columnes per matèria (qualificació/comentari), amb ordenació per nombre d'alumnes
-- Visualització directa d'actes CSV exportades d'Esfera (ESO i CF)
+- Visualització directa d'actes CSV exportades d'Esfera (ESO)
 - Suport per a qualificacions: "No assoliment", "Assoliment satisfactori", "Assoliment notable", "Assoliment excel·lent"
-- Suport per a CF: "Assolit-X", "No assolit", "Convalidat", "Pendent"
 - Vista global amb estadístiques generals i distribució de qualificacions
 - Vista per matèria amb estadístiques específiques i llista d'alumnes
 - Vista per alumne amb resum complet de qualificacions i comentaris
@@ -92,17 +79,14 @@ El sistema classifica automàticament les matèries:
 ├── app.py         # Aplicació principal
 ├── requirements.txt       # Dependències del projecte
 ├── sections/            # Seccions principals de l'aplicació
-│   ├── acta_viewer.py   # Visualització d'actes CSV
 │   ├── evolution.py     # Visualitzacions d'evolució de notes
 │   ├── student_marks.py # Visualització de notes per alumne
 │   ├── student_selector.py # Selector d'alumnes
 │   └── visualization.py # Visualitzacions generals i estadístiques
 ├── utils/               # Funcions i ajudants d'utilitat
-│   ├── acta_loader.py   # Càrrega i processament d'actes CSV (CF)
 │   ├── acta_csv_loader.py # Càrrega i processament d'actes CSV (ESO)
-│   ├── data_normalizer.py # Normalització de dades CSV/JSON
+│   ├── data_normalizer.py # Normalització de dades CSV
 │   ├── constants.py     # Constants i configuracions
-│   ├── csv_to_json.py   # Conversió de CSV a JSON
 │   ├── data_loader.py   # Càrrega de dades
 │   ├── generate_dummy_data.py # Generació de dades de prova
 │   └── helpers.py       # Funcions auxiliars
@@ -113,7 +97,7 @@ El sistema classifica automàticament les matèries:
 
 1. Clona el repositori:
 ```bash
-git clone [url-del-repositori]
+git clone git@github.com:ElPuig/metrika.git
 cd metrika
 ```
 
@@ -138,9 +122,9 @@ streamlit run app.py
 2. Accedeix a l'aplicació a través del teu navegador web a `http://localhost:8501`
 
 3. Selecciona el mode de treball:
-   - **Estadístiques**: Carrega fitxers JSON o CSV d'actes ESO
-   - **Actes CSV (CF)**: Visualitza actes de Cicles Formatius
-   - **Convertir CSV**: Converteix CSV a JSON
+   - Carrega fitxers CSV d'actes ESO
+   - Tria el trimestre actiu
+   - Navega per les pestanyes: Grup, Materia, Alumne, Comparador i Exportació
 
 ## Guia d'usuari (MkDocs)
 
@@ -162,13 +146,12 @@ mkdocs build --strict
 
 ### Publicacio
 
-La publicacio es fa automaticament amb GitHub Actions cap a GitHub Pages quan hi ha canvis a la branca principal.
+La publicacio es fa automaticament amb GitHub Actions cap a GitHub Pages quan hi ha canvis a la branca `dev`.
 
 ## Característiques Principals
 
-### Visualització d'Estadístiques (JSON/CSV)
-- **Càrrega flexible**: Suporta fitxers JSON i CSV d'actes ESO
-- **Selector de tipus**: Tria entre JSON o CSV (Actes) a la interfície
+### Visualització d'Estadístiques (CSV d'actes)
+- **Càrrega flexible**: Suporta fitxers CSV d'actes ESO
 - **Classificació automàtica**:
   - Matèries de 4t: Comptabilitzades a l'estadística global
   - Matèries pendents (1r, 2n, 3r): Mostrades separadament, NO comptabilitzades
@@ -186,18 +169,6 @@ La publicacio es fa automaticament amb GitHub Actions cap a GitHub Pages quan hi
      - Una fila per alumne
      - Dues columnes per matèria: qualificació i comentari
      - Matèries ordenades per nombre d'alumnes (de més a menys), deixant normalment les optatives al final
-
-### Visualització d'Actes CSV (CF)
-- Càrrega directa de fitxers CSV d'actes exportats d'Esfera
-- Suport per a format pipe-delimited amb fins a 100 matèries per alumne
-- Processament automàtic de qualificacions:
-  - **Assolit-X**: Qualificacions numèriques (0-10)
-  - **No assolit**: Competència no assolida
-  - **Convalidat**: Matèria convalidada
-  - **Pendent**: Qualificació pendent
-- **Vista Global**: Estadístiques generals, distribució de qualificacions, histograma de notes, rànquing d'alumnes
-- **Vista per Matèria**: Estadístiques específiques, distribució, llista d'alumnes amb notes i comentaris
-- **Vista per Alumne**: Resum complet, taxa d'èxit, mitjana, distribució i comentari general
 
 ### Visualització de Dades
 - Taules de rendiment de l'aula
@@ -227,7 +198,7 @@ El sistema de comentaris està integrat a totes les vistes principals i desa la 
 - Tipus de comentari: alumnes, matèries, grups i sessions (trimestre+grup)
 - Persistència automàtica i recuperació en iniciar l'aplicació
 - Gestió des de la barra lateral: estadístiques, exportació/importació, esborrar-ho tot
-- Suport d'importació/exportació amb fitxers JSON amb marca de temps
+- Suport d'importació/exportació amb fitxers de comentaris amb marca de temps
 
 **On apareixen**
 - Vista Alumne: comentaris generals després de les taules de notes

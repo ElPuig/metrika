@@ -20,7 +20,7 @@ The comments system has been successfully integrated into all major views of the
 
    #### Student View (`student_marks.py`)
    - General student comments after the marks tables
-   - Available for both CSV and JSON data formats
+   - Available for CSV acta data
    
    #### Subject View (`visualization.py` - `display_subject_statistics`)
    - Subject-specific comments after the statistics charts

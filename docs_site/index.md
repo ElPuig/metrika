@@ -1,23 +1,33 @@
-# Metrika
+# Benvinguda a Metrika
 
-Metrika es una eina per visualitzar i analitzar resultats academics a partir de fitxers CSV d'actes.
+Metrika es una eina web per visualitzar i analitzar resultats academics a partir de fitxers CSV d'actes (ESO).
 
-Aquesta guia esta orientada a professorat i equips de coordinacio que necessiten:
+<span class="badge">Flux actual: CSV d'actes</span>
+<span class="badge">Sense conversio JSON</span>
 
-- Carregar fitxers CSV d'actes per trimestre.
-- Consultar estadistiques de grup, materia i alumne.
-- Comparar evolucio entre trimestres.
-- Exportar un CSV consolidat per trimestre.
+## Que hi trobaras en aquesta guia
 
-## Contingut de la guia
+- Una posada en marxa rapida per començar en minuts.
+- Un recorregut practic de les pestanyes principals de l'app.
+- Bones practiques per comparar trimestres.
+- FAQ i resolucio de problemes habituals.
 
-- Instal.lacio en entorn local.
-- Passos d'us recomanats.
-- Flux de treball per carregar i comparar fitxers.
-- Resolucio de problemes habituals.
+## Per on comencar (2 minuts)
+
+<div class="quick-links">
+
+- Posada en marxa: preparacio minima i primers passos.
+- Primer accés i instal-lacio: requisits basics per obrir l'app.
+- Us de l'eina: recorregut per les vistes principals.
+- Flux de treball: ordre recomanat d'analisi.
+
+</div>
 
 ## Acces rapid
 
-- Inici de l'app: `streamlit run app.py`
-- Servei de docs local: `mkdocs serve`
-- Build de docs: `mkdocs build --strict`
+```bash
+streamlit run app.py
+```
+
+!!! tip "Documentacio tecnica"
+	Si ets desenvolupador/a, consulta la seccio Developers per la part tecnica de MkDocs i automatitzacio de captures.

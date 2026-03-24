@@ -1,22 +1,44 @@
 site_name: Metrika - Guia d'Usuari
 site_description: Guia d'usuari de Metrika per a l'analisi de notes academiques
 site_url: https://ElPuig.github.io/metrika/
+repo_url: https://github.com/ElPuig/metrika
+repo_name: ElPuig/metrika
 docs_dir: docs_site
 site_dir: site
 theme:
   name: material
   language: ca
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - toc.follow
+    - content.code.copy
 nav:
-  - Inici: index.md
-  - Instal-lacio: installation.md
-  - Us de l'eina: usage.md
-  - Flux de treball: workflow.md
-  - FAQ: faq.md
-  - Resolucio de problemes: troubleshooting.md
+  - Guia d'usuari:
+      - Benvinguda: index.md
+      - Posada en marxa: getting-started.md
+      - Primer acces i instal-lacio: installation.md
+  - Treball diari:
+      - Us de l'eina: usage.md
+      - Flux de treball: workflow.md
+  - Ajuda:
+      - FAQ: faq.md
+      - Resolucio de problemes: troubleshooting.md
+  - Developers:
+      - Introduccio tecnica: developers/index.md
+      - Automatitzar captures: developers/screenshot-automation.md
 markdown_extensions:
   - admonition
   - tables
+  - pymdownx.details
+  - pymdownx.superfences
   - toc:
       permalink: true
 plugins:
-  - search
+  - search:
+      lang:
+        - ca
+extra_css:
+  - stylesheets/extra.css

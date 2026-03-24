@@ -1,6 +1,4 @@
 import streamlit as st
-import json
-import os
 import re
 from collections import Counter
 from sections.student_marks import display_student_marks
@@ -16,19 +14,15 @@ from sections.visualization import (
     display_subject_statistics
 )
 from sections.evolution import display_evolution_dashboard
-from sections.acta_viewer import display_acta_viewer
-from utils.constants import MarkConfig, AppConfig
+from utils.constants import AppConfig
 from utils.acta_csv_loader import (
     parse_uploaded_acta_csv,
     get_acta_csv_info,
     build_term_export_dataframe,
     get_current_course_subject_enrollment
 )
-from utils.comments_manager import CommentsManager, get_session_id, render_comments_management_sidebar
-import plotly.graph_objects as go
+from utils.comments_manager import CommentsManager, render_comments_management_sidebar
 import pandas as pd
-import plotly.express as px
-from csv_converter import main as csv_converter_main
 import logging
 
 # logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')

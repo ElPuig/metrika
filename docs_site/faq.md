@@ -4,6 +4,10 @@
 
 Fitxers CSV d'actes compatibles amb l'estructura esperada per Metrika.
 
+## El flux JSON encara esta disponible?
+
+No. El flux actual de l'eina esta centrat en CSV d'actes.
+
 ## Puc comparar mes d'un trimestre?
 
 Si. Carrega diversos fitxers i usa la pestanya Comparador.

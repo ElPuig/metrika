@@ -1,15 +1,15 @@
-# Instal.lacio
+# Instal-lacio
 
-## Requisits
+## Requisits previs
 
-- Python 3.12 o superior.
-- pip actualitzat.
+- Python 3.12 o superior
+- pip actualitzat
 
-## Passos
+## Instal-lacio pas a pas (Windows)
 
-1. Clona el repositori i entra al directori del projecte.
+1. Clona el repositori i entra al directori.
 2. Crea i activa un entorn virtual.
-3. Instal.la dependencies.
+3. Instal-la dependencies del projecte.
 
 ```bash
 python -m venv venv
@@ -17,18 +17,21 @@ venv\\Scripts\\activate
 pip install -r requirements.txt
 ```
 
-## Inici de l'aplicacio
+## Verificacio rapida
+
+Engega l'aplicacio:
 
 ```bash
 streamlit run app.py
 ```
 
-L'aplicacio quedara disponible a `http://localhost:8501`.
+URL esperada: http://localhost:8501
 
-## Inici de la documentacio local
+## Que has de veure en iniciar
 
-```bash
-mkdocs serve
-```
+- Pantalla de carrega de fitxers CSV.
+- Missatge per arrossegar almenys un fitxer.
+- Sidebar amb informacio de versio i enllac a guia.
 
-La guia quedara disponible a `http://127.0.0.1:8000`.
+!!! tip "Si algun paquet falla"
+	Torna a executar la instal-lacio i comprova que l'entorn virtual estigui activat abans de llançar Streamlit.
