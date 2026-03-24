@@ -133,6 +133,9 @@ class AppConfig:
     
     # Version description
     VERSION_DESCRIPTION = "Versió inicial amb suport per a CSV d'actes i sistema de comentaris"
+
+    # User documentation URL (MkDocs published site)
+    DOCS_URL = "https://ElPuig.github.io/metrika/"
     
     # Minimum compatible version (for backward compatibility)
     MIN_COMPATIBLE_VERSION = "0.1.0"

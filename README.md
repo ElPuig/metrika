@@ -142,6 +142,28 @@ streamlit run app.py
    - **Actes CSV (CF)**: Visualitza actes de Cicles Formatius
    - **Convertir CSV**: Converteix CSV a JSON
 
+## Guia d'usuari (MkDocs)
+
+La guia d'usuari de Metrika esta integrada amb MkDocs i el codi font viu a `docs_site/`.
+
+### Execucio local de la guia
+
+```bash
+mkdocs serve
+```
+
+La guia quedara disponible a `http://127.0.0.1:8000`.
+
+### Build de validacio
+
+```bash
+mkdocs build --strict
+```
+
+### Publicacio
+
+La publicacio es fa automaticament amb GitHub Actions cap a GitHub Pages quan hi ha canvis a la branca principal.
+
 ## Característiques Principals
 
 ### Visualització d'Estadístiques (JSON/CSV)

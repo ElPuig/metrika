@@ -265,6 +265,8 @@ def main():
         with col2:
             st.markdown(f"**Versió:** {AppConfig.VERSION}")
             st.markdown(f"**Nom:** {AppConfig.APP_NAME}")
+
+        st.link_button("📘 Guia d'usuari", AppConfig.DOCS_URL, use_container_width=True)
         
         st.markdown("---")
     
