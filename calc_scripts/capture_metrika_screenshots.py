@@ -8,12 +8,13 @@ from pathlib import Path
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Capture Metrika tab screenshots after uploading a CSV file"
+        description="Capture Metrika tab screenshots after uploading one or more CSV files"
     )
     parser.add_argument(
         "--csv",
         required=True,
-        help="Path to CSV file to upload",
+        nargs="+",
+        help="Path(s) to CSV files to upload. Use at least two files to enable evolution in Comparador.",
     )
     parser.add_argument(
         "--url",
@@ -40,9 +41,15 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def ensure_paths(csv_path: Path, output_dir: Path) -> None:
-    if not csv_path.exists() or not csv_path.is_file():
-        raise FileNotFoundError(f"CSV file not found: {csv_path}")
+def ensure_paths(csv_paths: list[Path], output_dir: Path) -> None:
+    if not csv_paths:
+        raise ValueError("No CSV files were provided")
+
+    missing_files = [str(path) for path in csv_paths if not path.exists() or not path.is_file()]
+    if missing_files:
+        missing_list = "\n".join(f"- {path}" for path in missing_files)
+        raise FileNotFoundError(f"CSV file(s) not found:\n{missing_list}")
+
     output_dir.mkdir(parents=True, exist_ok=True)
 
 
@@ -50,6 +57,111 @@ def click_tab_and_capture(page, tab_name: str, output_file: Path, wait_seconds: 
     page.get_by_role("tab", name=tab_name).click()
     time.sleep(wait_seconds)
     page.screenshot(path=str(output_file), full_page=True)
+
+
+def collapse_sidebar(page, wait_seconds: float) -> None:
+    """Collapse Streamlit sidebar if it is visible."""
+    collapse_selectors = [
+        "button[aria-label='Collapse sidebar']",
+        "button[aria-label='Close sidebar']",
+        "button[title='Collapse sidebar']",
+        "button[title='Close sidebar']",
+        "[data-testid='stSidebarCollapseButton'] button",
+        "[data-testid='collapsedControl']",
+    ]
+
+    for selector in collapse_selectors:
+        control = page.locator(selector).first
+        if control.count() == 0:
+            continue
+
+        try:
+            if control.is_visible():
+                control.click(timeout=2500)
+                time.sleep(wait_seconds)
+                return
+        except Exception:
+            continue
+
+    # Fallback shortcut commonly used by Streamlit to toggle sidebar.
+    try:
+        page.keyboard.press("Control+b")
+        time.sleep(wait_seconds)
+    except Exception:
+        pass
+
+
+def force_hide_sidebar(page) -> None:
+    """Hard fallback: hide sidebar via CSS if toggle controls are not available."""
+    page.add_style_tag(
+        content="""
+        section[data-testid='stSidebar'] { display: none !important; }
+        [data-testid='collapsedControl'] { display: none !important; }
+        .stMainBlockContainer, [data-testid='stMainBlockContainer'] {
+            margin-left: 0 !important;
+            padding-left: 1rem !important;
+        }
+        """
+    )
+
+
+def align_main_tabs_as_top(page) -> None:
+    """Scroll so the main tabs row is at the top of the viewport."""
+    script = """
+    () => {
+        const tab = Array.from(document.querySelectorAll('[role="tab"]'))
+            .find((el) => (el.textContent || '').trim() === 'Grup');
+        if (!tab) {
+            return false;
+        }
+        const y = tab.getBoundingClientRect().top + window.scrollY - 8;
+        window.scrollTo(0, Math.max(0, y));
+        return true;
+    }
+    """
+    page.evaluate(script)
+
+
+def screenshot_from_main_tabs(page, output_file: Path) -> None:
+    """Capture viewport clipped from the main tabs row to the bottom."""
+    main_tab = page.get_by_role("tab", name="Grup").first
+    main_tab.wait_for(timeout=30000)
+    box = main_tab.bounding_box()
+
+    if box is None:
+        page.screenshot(path=str(output_file), full_page=False)
+        return
+
+    viewport = page.viewport_size or {"width": 1600, "height": 1000}
+    clip_y = max(0, box["y"] - 8)
+    clip_height = max(100, viewport["height"] - clip_y)
+
+    page.screenshot(
+        path=str(output_file),
+        full_page=False,
+        clip={
+            "x": 0,
+            "y": clip_y,
+            "width": viewport["width"],
+            "height": clip_height,
+        },
+    )
+
+
+def click_nested_tab_and_capture(
+    page,
+    parent_tab_name: str,
+    nested_tab_name: str,
+    output_file: Path,
+    wait_seconds: float,
+) -> None:
+    page.get_by_role("tab", name=parent_tab_name).click()
+    time.sleep(wait_seconds)
+    page.get_by_role("tab", name=nested_tab_name).click()
+    time.sleep(wait_seconds)
+    align_main_tabs_as_top(page)
+    time.sleep(0.2)
+    screenshot_from_main_tabs(page, output_file)
 
 
 def main() -> int:
@@ -63,18 +175,15 @@ def main() -> int:
         return 1
 
     args = parse_args()
-    csv_path = Path(args.csv).expanduser().resolve()
+    csv_paths = [Path(csv_value).expanduser().resolve() for csv_value in args.csv]
     output_dir = Path(args.output_dir).expanduser().resolve()
     headless = args.headless.lower() == "true"
 
-    ensure_paths(csv_path, output_dir)
+    ensure_paths(csv_paths, output_dir)
 
-    tabs_to_capture = [
-        ("Grup", "01_grup.png"),
-        ("Materia", "02_materia.png"),
-        ("Alumne", "03_alumne.png"),
-        ("Comparador", "04_comparador.png"),
-        ("Exportació", "05_exportacio.png"),
+    comparator_tabs_to_capture = [
+        ("Evolució del grup", "04_comparador_grup.png"),
+        ("Evolució per alumne", "05_comparador_alumne.png"),
     ]
 
     with sync_playwright() as p:
@@ -87,15 +196,34 @@ def main() -> int:
 
             # Upload a CSV through Streamlit's file uploader input.
             file_input = page.locator("input[type='file']")
-            file_input.set_input_files(str(csv_path))
+            file_input.set_input_files([str(path) for path in csv_paths])
+
+            print("Uploaded CSV files:")
+            for path in csv_paths:
+                print(f"- {path}")
 
             # Wait until tab navigation appears after data load.
             page.get_by_role("tab", name="Grup").wait_for(timeout=90000)
             time.sleep(args.wait_seconds)
 
-            for tab_name, file_name in tabs_to_capture:
+            collapse_sidebar(page, args.wait_seconds)
+            force_hide_sidebar(page)
+            time.sleep(args.wait_seconds)
+
+            # Ensure comparator content is loaded before capturing nested tabs.
+            page.get_by_role("tab", name="Comparador").click()
+            page.get_by_role("tab", name="Evolució del grup").wait_for(timeout=90000)
+            time.sleep(args.wait_seconds)
+
+            for nested_tab_name, file_name in comparator_tabs_to_capture:
                 output_file = output_dir / file_name
-                click_tab_and_capture(page, tab_name, output_file, args.wait_seconds)
+                click_nested_tab_and_capture(
+                    page,
+                    "Comparador",
+                    nested_tab_name,
+                    output_file,
+                    args.wait_seconds,
+                )
                 print(f"Saved: {output_file}")
 
         except PlaywrightTimeoutError as exc:
