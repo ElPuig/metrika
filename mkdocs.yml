@@ -22,6 +22,7 @@ nav:
       - Primer acces i instal-lacio: installation.md
   - Treball diari:
       - Us de l'eina: usage.md
+      - Captures de pantalla: screenshots.md
       - Flux de treball: workflow.md
   - Ajuda:
       - FAQ: faq.md

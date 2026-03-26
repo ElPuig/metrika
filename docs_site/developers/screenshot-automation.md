@@ -31,12 +31,14 @@ streamlit run app.py
 En una altra terminal, executa:
 
 ```bash
-python calc_scripts/capture_metrika_screenshots.py --csv "docs/data/el_teu_fitxer.csv"
+python calc_scripts/capture_metrika_screenshots.py --csv "docs/data/el_teu_fitxer.csv" --output-dir "docs_site/assets/screenshots"
 ```
 
 ## Sortida
 
-Les captures es generen a `docs_site/assets/screenshots/`.
+Per defecte, l'script guarda les captures a una ruta relativa (`docs_site/assets/screenshots/`) des del directori on l'executes.
+
+Per publicar-les al site de MkDocs, han d'acabar a `docs_site/assets/screenshots/` de l'arrel del repositori.
 
 Fitxers esperats:
 
@@ -44,7 +46,10 @@ Fitxers esperats:
 - `02_materia.png`
 - `03_alumne.png`
 - `04_comparador.png`
+- `04_comparador_grup.png`
+- `05_comparador_alumne.png`
 - `05_exportacio.png`
+- `06_exportacio.png`
 
 ## Parametres utiles
 

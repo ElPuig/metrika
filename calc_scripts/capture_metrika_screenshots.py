@@ -53,10 +53,9 @@ def ensure_paths(csv_paths: list[Path], output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
 
-def click_tab_and_capture(page, tab_name: str, output_file: Path, wait_seconds: float) -> None:
+def click_main_tab(page, tab_name: str, wait_seconds: float) -> None:
     page.get_by_role("tab", name=tab_name).click()
     time.sleep(wait_seconds)
-    page.screenshot(path=str(output_file), full_page=True)
 
 
 def collapse_sidebar(page, wait_seconds: float) -> None:
@@ -155,10 +154,21 @@ def click_nested_tab_and_capture(
     output_file: Path,
     wait_seconds: float,
 ) -> None:
-    page.get_by_role("tab", name=parent_tab_name).click()
-    time.sleep(wait_seconds)
+    click_main_tab(page, parent_tab_name, wait_seconds)
     page.get_by_role("tab", name=nested_tab_name).click()
     time.sleep(wait_seconds)
+    align_main_tabs_as_top(page)
+    time.sleep(0.2)
+    screenshot_from_main_tabs(page, output_file)
+
+
+def click_main_tab_and_capture(
+    page,
+    tab_name: str,
+    output_file: Path,
+    wait_seconds: float,
+) -> None:
+    click_main_tab(page, tab_name, wait_seconds)
     align_main_tabs_as_top(page)
     time.sleep(0.2)
     screenshot_from_main_tabs(page, output_file)
@@ -181,9 +191,19 @@ def main() -> int:
 
     ensure_paths(csv_paths, output_dir)
 
+    main_tabs_to_capture = [
+        ("Grup", "01_grup.png"),
+        ("Materia", "02_materia.png"),
+        ("Alumne", "03_alumne.png"),
+    ]
+
     comparator_tabs_to_capture = [
         ("Evolució del grup", "04_comparador_grup.png"),
         ("Evolució per alumne", "05_comparador_alumne.png"),
+    ]
+
+    trailing_main_tabs_to_capture = [
+        ("Exportació", "06_exportacio.png"),
     ]
 
     with sync_playwright() as p:
@@ -211,7 +231,13 @@ def main() -> int:
             time.sleep(args.wait_seconds)
 
             # Ensure comparator content is loaded before capturing nested tabs.
-            page.get_by_role("tab", name="Comparador").click()
+            for main_tab_name, file_name in main_tabs_to_capture:
+                output_file = output_dir / file_name
+                click_main_tab_and_capture(page, main_tab_name, output_file, args.wait_seconds)
+                print(f"Saved: {output_file}")
+
+            # Ensure comparator content is loaded before capturing nested tabs.
+            click_main_tab(page, "Comparador", args.wait_seconds)
             page.get_by_role("tab", name="Evolució del grup").wait_for(timeout=90000)
             time.sleep(args.wait_seconds)
 
@@ -224,6 +250,11 @@ def main() -> int:
                     output_file,
                     args.wait_seconds,
                 )
+                print(f"Saved: {output_file}")
+
+            for main_tab_name, file_name in trailing_main_tabs_to_capture:
+                output_file = output_dir / file_name
+                click_main_tab_and_capture(page, main_tab_name, output_file, args.wait_seconds)
                 print(f"Saved: {output_file}")
 
         except PlaywrightTimeoutError as exc:
