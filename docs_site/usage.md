@@ -41,4 +41,4 @@ Al final del recorregut has de tenir:
 - Un CSV d'exportacio compartible.
 
 !!! note "Important"
-	L'eina opera sobre CSV d'actes. Les referencies a fluxos JSON antics no formen part del flux actual.
+	L'eina opera exclusivament sobre CSV d'actes.

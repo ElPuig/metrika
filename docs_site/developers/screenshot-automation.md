@@ -42,14 +42,29 @@ Per publicar-les al site de MkDocs, han d'acabar a `docs_site/assets/screenshots
 
 Fitxers esperats:
 
-- `01_grup.png`
-- `02_materia.png`
-- `03_alumne.png`
-- `04_comparador.png`
-- `04_comparador_grup.png`
-- `05_comparador_alumne.png`
-- `05_exportacio.png`
-- `06_exportacio.png`
+- `00_grup_overview.png`
+- `01_grup_resum_suspensos_alumne.png`
+- `02_grup_assignatures_mes_suspeses.png`
+- `03_grup_distribucio_qualificacions_assignatura.png`
+- `04_grup_mapa_calor_alumnes_assignatures.png`
+- `05_grup_ranking_mitjana_numerica.png`
+- `00_materia_overview.png`
+- `06_materia_comentaris_per_alumne.png`
+- `07_materia_distribucio_qualificacions.png`
+- `08_materia_aprovats_no_aprovats.png`
+- `00_alumne_overview.png`
+- `09_alumne_nota_mitjana.png`
+- `10_alumne_flag_adaptacio.png`
+- `11_alumne_distribucio_qualificacions.png`
+- `12_alumne_materies_pendents.png` (opcional, només si n'hi ha)
+- `13_comparador_evolucio_grup_grafica.png`
+- `14_comparador_distribucio_qualificacions_trimestre.png`
+- `15_comparador_evolucio_mitjana_materia.png`
+- `16_comparador_alumnes_milloren.png`
+- `17_comparador_alumnes_regressio.png`
+- `18_comparador_evolucio_alumne_overview.png`
+- `19_comparador_taula_comparacio_materia.png`
+- `20_exportacio_overview.png`
 
 ## Parametres utiles
 

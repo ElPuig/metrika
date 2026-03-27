@@ -3,7 +3,7 @@
 Metrika es una eina web per visualitzar i analitzar resultats academics a partir de fitxers CSV d'actes (ESO).
 
 <span class="badge">Flux actual: CSV d'actes</span>
-<span class="badge">Sense conversio JSON</span>
+<span class="badge">Format unic: CSV</span>
 
 ## Que hi trobaras en aquesta guia
 

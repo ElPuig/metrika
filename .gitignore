@@ -59,6 +59,7 @@ frontend/protobuf/proto.d.ts
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+capture_run.log
 
 # Yarn files
 **/.yarn/*
@@ -150,3 +151,5 @@ frontend/cypress/snapshots/linux/1x
 /comments/*.json
 !comments/.gitkeep
 /imported_comments
+
+# 

@@ -20,9 +20,15 @@ nav:
       - Benvinguda: index.md
       - Posada en marxa: getting-started.md
       - Primer acces i instal-lacio: installation.md
+  - Seccions:
+    - Visio general: seccions/index.md
+    - Grup: seccions/grup.md
+    - Materia: seccions/materia.md
+    - Alumne: seccions/alumne.md
+    - Comparador: seccions/comparador.md
+    - Exportacio: seccions/exportacio.md
   - Treball diari:
       - Us de l'eina: usage.md
-      - Captures de pantalla: screenshots.md
       - Flux de treball: workflow.md
   - Ajuda:
       - FAQ: faq.md
